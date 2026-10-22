@@ -1,4 +1,4 @@
-# Version 2.0.0 · 2026-10-22 22:17 ── domains via rule-provider, IPs via IP-ASN
+# Version 2.1.0 · 2026-10-22 22:23 ── include carrier aggregate groups in the group head
 # MEGA 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
 #   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
@@ -23,6 +23,8 @@
     proxies:
       - ♻️自动选择
       - 🚀节点选择
+      # 运营商聚合组（✨移动推荐节点 / 电信 / 联通）也是 proxy-group，include-all 并不到，
+      # 必须写死组名；而 YAML 没法按后缀匹配、写错组名内核会拒绝整份配置 —— 要这三个请用 mega.js。
       - DIRECT
 
 rule-providers:

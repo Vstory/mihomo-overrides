@@ -238,6 +238,7 @@ rule-providers:
 - [ ] provider 段是普通 `rule-providers`，没加 `+`
 - [ ] 域名在前、IP 在后，IP 规则都带 `no-resolve`
 - [ ] 组名 `🌐 MEGA` 逐字一致，emoji 后有一个空格
+- [ ] 首选项里的聚合组（自动选择 / 节点选择 / 各运营商推荐节点）都真的在订阅里
 - [ ] `mega.yaml` 与 `mega.js` 的规则条目、provider 配置一致
 - [ ] 本地能加载：`python3 -c "import yaml;yaml.safe_load(open('mega.yaml'))"`、`node --check mega.js`
 - [ ] provider 的 mrs 地址能取到：`curl -sI <url>` 应为 200
@@ -247,4 +248,5 @@ rule-providers:
 
 - **YAML**：`include-all: true` 由内核全量并入。简单，但机场塞的伪节点（`剩余流量：xx GB`、`套餐到期`）挡不住——`exclude-filter` 只在 groupbase 对 provider 提供的节点生效，管不到 `include-all` 加进来的项。
 - **JS**：遍历 `config.proxies` 自己取名字并按正则剔伪节点；节点走 `proxy-providers` 时用 `use` 整包引入。
+- **`include-all` 不含 proxy-groups**：只并 `proxies` 里的节点和 provider 的节点。`♻️自动选择`、`✨移动推荐节点` 这类**聚合组**想出现在本组首选项里，必须显式写进 `proxies`。YAML 版只能写死组名（名字错了内核拒绝整份配置），JS 版按 `/推荐节点$/` 后缀匹配，机场换 emoji 或加运营商都不用改。
 - 组头只引用订阅里**真实存在**的组名。硬写一个不存在的组会让内核整个配置校验失败，换订阅就炸。

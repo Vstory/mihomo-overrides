@@ -1,4 +1,4 @@
-// Version 2.0.0 · 2026-10-22 22:17 ── domains via rule-provider, IPs via IP-ASN
+// Version 2.1.0 · 2026-10-22 22:23 ── include carrier aggregate groups in the group head
 // MEGA 覆写（JavaScript）。与 mega.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
 //   MEGA 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
@@ -17,10 +17,16 @@ function main(config) {
     if (groups[i] && groups[i].name) groupNames[groups[i].name] = true;
   }
 
-  // 组首选项：只引用订阅里真实存在的分组名 —— 硬写不存在的组会让内核整个配置校验失败
+  // 组首选项：只引用订阅里真实存在的分组名 —— 硬写不存在的组会让内核整个配置校验失败。
+  // include-all 只并节点和 provider，不会并 proxy-groups，所以运营商聚合组必须自己挑进来；
+  // 按「推荐节点」后缀匹配，机场换 emoji 或加运营商都不用改这里。
   var lead = [];
   if (groupNames['♻️自动选择']) lead.push('♻️自动选择');
   if (groupNames['🚀节点选择']) lead.push('🚀节点选择');
+  for (i = 0; i < groups.length; i++) {
+    var leadName = groups[i] && groups[i].name;
+    if (leadName && /推荐节点$/.test(leadName) && lead.indexOf(leadName) < 0) lead.push(leadName);
+  }
   lead.push('DIRECT');
 
   var nodeNames = [];
