@@ -194,8 +194,7 @@ Mishka 的 `IconDiskCache` 对每个 URL **没有 TTL、没有版本校验**：`
 
 | 层 | 写法 | 来源 | 为什么这样 |
 |----|------|------|-----------|
-| 域名（主力） | 4 条 `DOMAIN-SUFFIX`（mega.nz / mega.io / mega.co.nz / transfer.it） | 手写 | 保底。provider 拉取失败时 RULE-SET 匹配不到任何域名，流量落到订阅兜底规则，表现就是「规则没生效」 |
-| 域名（边角） | `RULE-SET,mega-site,🌐 MEGA` | rule-provider 拉 `meta-rules-dat/meta/geo/geosite/mega.mrs` | 官方分类维护 megaad.nz / megapay.nz / megas4.com 这类边角域名 |
+| 域名 | `GEOSITE,mega,🌐 MEGA` | 内核读 APK 内置的 `geosite.dat` | Mishka 构建时打包 meta-rules-dat 的 latest geosite.dat，mega 分类即 v2fly `data/mega` 那 7 条。不用 rule-provider：那份 mrs 与 geosite 同源，多一段 provider 配置只多一个单点 |
 | IP（兜底） | 25 条 `IP-CIDR` + 20 条 `IP-CIDR6` | AS203055 / AS205809 的公开公告前缀（RIPEstat），全量收、不聚合 | 不依赖任何数据文件，`IP-ASN` 加载不上时仍能命中。聚合会漏零散前缀（曾漏 `2a0b:e46:1::/48`） |
 | IP（主力） | `IP-ASN,203055` / `IP-ASN,205809` | 内核按 ASN 匹配，依赖 `ASN.mmdb` | 公告前缀变动自动跟上，不用跟 RIPEstat 对表 |
 
@@ -213,6 +212,8 @@ AS203055 = MEGA-LIMITED-AS，AS205809 = MEGA Privacy Kft.。只认 MEGA 自有 A
 | `megas4.com` | 业务域名 |
 
 **不要用 `GEOSITE,mega`。** 它依赖内置 `geosite.dat` 里是否打包了 `mega` 分类，而那是个随版本变化的二进制；查不到分类时规则静默失效，排查成本很高。rule-provider 不依赖本地数据版本，内容随上游更新。
+
+域名不要再用 rule-provider 绕一圈。`RULE-SET` 拉的 `mega.mrs` 和内置 `geosite.dat` 的 mega 分类是同一份数据的两种编译产物，覆盖完全一样；`GEOSITE` 一行就能表达的，不值得再加 10 行 provider 配置和一个「拉不下来就整段失效」的单点。
 
 **不要只靠 `IP-ASN`。** 它依赖 `ASN.mmdb` 被正确加载，加载不上时整条规则静默失效、流量直接落到 `Match`，从日志上只能看到「规则没生效」。所以公告前缀写在 `IP-ASN` 前面兜底。
 

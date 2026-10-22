@@ -1,4 +1,4 @@
-// Version 2.6.0 · 2026-10-22 23:28 ── use the full announced prefix set for both MEGA ASNs
+// Version 2.7.0 · 2026-10-22 23:41 ── match MEGA domains with GEOSITE instead of a rule-provider
 // MEGA 覆写（JavaScript）。与 mega.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
 //   MEGA 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
@@ -60,27 +60,9 @@ function main(config) {
   rest.splice(insertAt, 0, group);
   config['proxy-groups'] = rest;
 
-  // 规则来源见 mega.yaml 注释：域名走 rule-provider，IP 走 IP-ASN，都不需要手抄清单
-  var providers = config['rule-providers'] || {};
-  providers['mega-site'] = {
-    type: 'http',
-    behavior: 'domain',
-    format: 'mrs',
-    url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/mega.mrs',
-    path: './ruleset/mega.mrs',
-    interval: 86400
-  };
-  config['rule-providers'] = providers;
-
-  // 主力域名手写一份压在 RULE-SET 前面：provider 拉取失败时 RULE-SET 匹配不到任何域名，
-  // 流量会一路落到订阅兜底规则，表现就是"规则没生效"
-  var mega = [
-    'DOMAIN-SUFFIX,mega.nz,' + GROUP,
-    'DOMAIN-SUFFIX,mega.io,' + GROUP,
-    'DOMAIN-SUFFIX,mega.co.nz,' + GROUP,
-    'DOMAIN-SUFFIX,transfer.it,' + GROUP,
-    'RULE-SET,mega-site,' + GROUP
-  ];
+  // 域名走 GEOSITE：Mishka 构建时把 meta-rules-dat 的 latest geosite.dat 打进 APK，
+  // 里面的 mega 分类就是 v2fly domain-list-community 的 data/mega（7 条）
+  var mega = ['GEOSITE,mega,' + GROUP];
   // 网段取两个 ASN 的公开公告前缀全量，不聚合（聚合会漏掉 2a0b:e46:1::/48 这类零散前缀）
   var cidrs = ['162.208.16.0/24','185.206.24.0/24','185.206.25.0/24','185.206.26.0/24','185.206.27.0/24','217.180.20.0/24','217.180.21.0/24','31.216.144.0/24','31.216.145.0/24','31.216.146.0/24','31.216.147.0/24','31.216.148.0/24','66.203.124.0/24','66.203.125.0/24','66.203.126.0/23','82.21.172.0/24','82.29.203.0/24','82.29.204.0/24','82.29.205.0/24','82.29.206.0/24','82.29.207.0/24','89.44.168.0/24','89.44.169.0/24','94.24.36.0/24','94.24.37.0/24'];
   var cidrs6 = ['2001:678:25c::/48','2001:67c:1998::/48','2a09:a381:100::/40','2a09:a381::/40','2a0b:e40:1::/48','2a0b:e40:2::/48','2a0b:e40:3::/48','2a0b:e41:1::/48','2a0b:e41:2::/48','2a0b:e42:1::/48','2a0b:e43:1::/48','2a0b:e43::/40','2a0b:e44:1::/48','2a0b:e44:3::/48','2a0b:e44:4::/48','2a0b:e44:5::/48','2a0b:e44:6::/48','2a0b:e44:7::/48','2a0b:e45:1::/48','2a0b:e46:1::/48'];

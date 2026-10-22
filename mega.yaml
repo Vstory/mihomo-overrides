@@ -1,4 +1,4 @@
-# Version 2.6.0 · 2026-10-22 23:28 ── use the full announced prefix set for both MEGA ASNs
+# Version 2.7.0 · 2026-10-22 23:41 ── match MEGA domains with GEOSITE instead of a rule-provider
 # MEGA 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
 #   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
@@ -6,9 +6,9 @@
 #   rules 是顺序匹配：必须前插，追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）。
 #
 #   规则来源（都不用手写维护）：
-#     域名 —— rule-provider 拉 MetaCubeX 的 mega.mrs（对应 v2fly domain-list-community 的 mega
-#             分类，7 条域名，含 transfer.it / megapay.nz 这类容易漏的）；不用 GEOSITE,mega
-#             是因为它依赖内置 geosite.dat 是否打包了该分类，rule-provider 不依赖本地数据版本。
+#     域名 —— GEOSITE,mega。Mishka 构建时会把 meta-rules-dat 的 latest geosite.dat 打进 APK
+#             （app/build.gradle.kts），里面就有 mega 分类（7 条，与 v2fly domain-list-community
+#             的 data/mega 同源）。代价：跟着 app 版本走，不更新客户端就一直用打包时的快照。
 #     IP   —— IP-ASN 直接按 MEGA 自有 ASN 匹配，不用再手抄网段；依赖 ASN.mmdb（Mishka 内置）。
 #
 #   include-all 让组自动并入订阅里的全部节点（proxies 与 proxy-providers 都算），换订阅、
@@ -29,24 +29,9 @@
     icon: https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/mega.png
     include-all: true
 
-rule-providers:
-  mega-site:
-    type: http
-    behavior: domain
-    format: mrs
-    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/mega.mrs
-    path: ./ruleset/mega.mrs
-    interval: 86400
-
 +rules:
   # rules 顺序匹配，必须前插：追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）
-  # 主力域名手写一份放在 RULE-SET 之前：provider 首次拉取失败时 RULE-SET 匹配不到任何
-  # 域名，MEGA 会一路落到订阅兜底规则，表现为"规则没生效"。
-  - DOMAIN-SUFFIX,mega.nz,🌐 MEGA
-  - DOMAIN-SUFFIX,mega.io,🌐 MEGA
-  - DOMAIN-SUFFIX,mega.co.nz,🌐 MEGA
-  - DOMAIN-SUFFIX,transfer.it,🌐 MEGA
-  - RULE-SET,mega-site,🌐 MEGA
+  - GEOSITE,mega,🌐 MEGA
   # 网段直接取 AS203055 + AS205809 的公开公告前缀（RIPEstat），全量收、不聚合：
   # 聚合会顺带覆盖同段里的邻接分配，而且漏掉 2a0b:e46:1::/48 这种零散前缀时无从察觉。
   # 公告前缀会变，IP-ASN 放在最后当动态兜底。
