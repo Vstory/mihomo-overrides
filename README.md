@@ -25,7 +25,20 @@ https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/mega.js
 
 | 文件 | 应用 | 内容 |
 |------|------|------|
-| `mega.yaml` / `mega.js` | MEGA 网盘 | `🌐 MEGA` 分组 + 域名与自有 ASN 网段规则（前插） |
+| `mega.js` | MEGA 网盘 | `🌐 MEGA` 分组（**自动并入订阅全部节点**，剔掉机场伪节点）+ 域名与自有 ASN 网段规则（前插） |
+| `mega.yaml` | MEGA 网盘 | 同上，但节点靠 `include-all` 全量并入（伪节点会一起进来） |
+
+## 分组里的节点从哪来
+
+两个文件都**不需要手写节点名**，订阅换节点、加节点都不用改：
+
+- `mega.js`：遍历 `proxies` 逐个取名字，过滤掉 `剩余流量 / 套餐到期 / 距离下次重置` 这类机场伪节点；
+  节点走 `proxy-providers` 的订阅则自动用 `use` 整包引入。组头固定放 `♻️自动选择`、`🚀节点选择`（订阅里存在时）
+  和 `DIRECT`，其余全是真节点。
+- `mega.yaml`：`include-all: true` 由内核并入全部节点。简单，但伪节点挡不住——`exclude-filter`
+  只对 provider 节点生效，管不到 `include-all` 加进来的项。
+
+要「组里就是完整节点列表」，用 `mega.js`。
 
 ## 覆写语义
 

@@ -1,19 +1,52 @@
-// MEGA 覆写（JavaScript）。与 mega.yaml 等价，Mishka 的覆写支持 YAML / JavaScript 两种格式：
-//   内核把整份订阅配置交进来（main(config)），返回值就是套用后的配置。
-//   选 JS 的好处是能按条件改、能去重；只想改规则的话 YAML 版更省事。
+// MEGA 覆写（JavaScript）。与 mega.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
+//   🌐 MEGA 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
+//   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
+//   内核约定：main(config) 的入参出参都是整份配置对象（goja 执行、2 秒超时、输出上限 1 MB）。
 function main(config) {
   var GROUP = '🌐 MEGA';
-  var PROXIES = ['🚀节点选择', '♻️自动选择', 'DIRECT'];  // 换订阅时改这一行
+  // 机场惯用伪节点名，命中就不进组（想连这些信息节点也能选的话，删掉这一行）
+  var FAKE = /剩余流量|剩余|距离下次|套餐到期|过期|到期时间|官网|重置|流量重置/;
 
   var groups = config['proxy-groups'] || [];
-  var exists = false;
-  for (var i = 0; i < groups.length; i++) {
-    if (groups[i] && groups[i].name === GROUP) { exists = true; break; }
+  var groupNames = {};
+  var i;
+  for (i = 0; i < groups.length; i++) {
+    if (groups[i] && groups[i].name) groupNames[groups[i].name] = true;
   }
-  if (!exists) {
-    groups.push({ name: GROUP, type: 'select', proxies: PROXIES.slice() });
+
+  // 组首选项：只引用订阅里真实存在的分组名 —— 硬写不存在的组会让内核整个配置校验失败
+  var lead = [];
+  if (groupNames['♻️自动选择']) lead.push('♻️自动选择');
+  if (groupNames['🚀节点选择']) lead.push('🚀节点选择');
+  lead.push('DIRECT');
+
+  var nodeNames = [];
+  var seen = {};
+  var proxies = config.proxies || [];
+  for (i = 0; i < proxies.length; i++) {
+    var n = proxies[i] && proxies[i].name;
+    if (!n || FAKE.test(n) || seen[n] || lead.indexOf(n) >= 0) continue;
+    seen[n] = true;
+    nodeNames.push(n);
   }
-  config['proxy-groups'] = groups;
+
+  // 节点走 proxy-providers 的订阅：proxies 为空，得用 use 把 provider 整包引进来
+  var use = [];
+  var pp = config['proxy-providers'] || {};
+  for (var k in pp) {
+    if (Object.prototype.hasOwnProperty.call(pp, k)) use.push(k);
+  }
+
+  var group = { name: GROUP, type: 'select', proxies: lead.concat(nodeNames) };
+  if (use.length > 0) group.use = use;
+
+  // 同名旧组先删：同一覆写被反复选中时不会叠出两个同名组
+  var rest = [];
+  for (i = 0; i < groups.length; i++) {
+    if (!groups[i] || groups[i].name !== GROUP) rest.push(groups[i]);
+  }
+  rest.push(group);
+  config['proxy-groups'] = rest;
 
   var domains = ['mega.nz', 'mega.io', 'mega.co.nz'];
   var cidrs = [
@@ -33,8 +66,12 @@ function main(config) {
   for (j = 0; j < cidrs.length; j++) mega.push('IP-CIDR,' + cidrs[j] + ',' + GROUP + ',no-resolve');
   for (j = 0; j < cidrs6.length; j++) mega.push('IP-CIDR6,' + cidrs6[j] + ',' + GROUP + ',no-resolve');
 
-  // 先剔掉旧的同款规则再前插：重复选中同一覆写不会越叠越多，也不会出现两份互相打架的组。
-  var rest = (config.rules || []).filter(function (r) { return mega.indexOf(r) < 0; });
-  config.rules = mega.concat(rest);
+  // 先剔掉旧的同款规则再前插：重复选中同一覆写不会越叠越多
+  var oldRules = config.rules || [];
+  var kept = [];
+  for (j = 0; j < oldRules.length; j++) {
+    if (mega.indexOf(oldRules[j]) < 0) kept.push(oldRules[j]);
+  }
+  config.rules = mega.concat(kept);
   return config;
 }
