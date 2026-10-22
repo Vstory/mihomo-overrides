@@ -1,4 +1,4 @@
-// Version 2.1.0 · 2026-10-22 22:23 ── include carrier aggregate groups in the group head
+// Version 2.2.0 · 2026-10-22 22:55 ── hand-write core MEGA domains as a fallback ahead of the rule-provider
 // MEGA 覆写（JavaScript）。与 mega.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
 //   MEGA 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
@@ -76,7 +76,13 @@ function main(config) {
   };
   config['rule-providers'] = providers;
 
+  // 主力域名手写一份压在 RULE-SET 前面：provider 拉取失败时 RULE-SET 匹配不到任何域名，
+  // 流量会一路落到订阅兜底规则，表现就是"规则没生效"
   var mega = [
+    'DOMAIN-SUFFIX,mega.nz,' + GROUP,
+    'DOMAIN-SUFFIX,mega.io,' + GROUP,
+    'DOMAIN-SUFFIX,mega.co.nz,' + GROUP,
+    'DOMAIN-SUFFIX,transfer.it,' + GROUP,
     'RULE-SET,mega-site,' + GROUP,
     'IP-ASN,203055,' + GROUP + ',no-resolve',
     'IP-ASN,205809,' + GROUP + ',no-resolve'

@@ -194,7 +194,8 @@ Mishka 的 `IconDiskCache` 对每个 URL **没有 TTL、没有版本校验**：`
 
 | 层 | 写法 | 来源 | 为什么这样 |
 |----|------|------|-----------|
-| 域名 | `RULE-SET,mega-site,🌐 MEGA` | rule-provider 拉 `meta-rules-dat/meta/geo/geosite/mega.mrs` | 官方分类已经维护好 7 条域名，不用手抄，也不会漏新增域名 |
+| 域名（主力） | 4 条 `DOMAIN-SUFFIX`（mega.nz / mega.io / mega.co.nz / transfer.it） | 手写 | 保底。provider 拉取失败时 RULE-SET 匹配不到任何域名，流量落到订阅兜底规则，表现就是「规则没生效」 |
+| 域名（边角） | `RULE-SET,mega-site,🌐 MEGA` | rule-provider 拉 `meta-rules-dat/meta/geo/geosite/mega.mrs` | 官方分类维护 megaad.nz / megapay.nz / megas4.com 这类边角域名 |
 | IP | `IP-ASN,203055` / `IP-ASN,205809` | 内核按 ASN 匹配，依赖 `ASN.mmdb` | 不用手抄前缀表；Mishka 的 assets 里就有 ASN.mmdb，CI 还会校验它在包里 |
 
 AS203055 = MEGA-LIMITED-AS，AS205809 = MEGA Privacy Kft.。只认 MEGA 自有 ASN，**不收第三方 CDN / 云厂商段**——那些段是共享的，收进来会误伤。

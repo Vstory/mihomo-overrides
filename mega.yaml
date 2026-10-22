@@ -1,4 +1,4 @@
-# Version 2.1.0 · 2026-10-22 22:23 ── include carrier aggregate groups in the group head
+# Version 2.2.0 · 2026-10-22 22:55 ── hand-write core MEGA domains as a fallback ahead of the rule-provider
 # MEGA 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
 #   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
@@ -38,6 +38,12 @@ rule-providers:
 
 +rules:
   # rules 顺序匹配，必须前插：追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）
+  # 主力域名手写一份放在 RULE-SET 之前：provider 首次拉取失败时 RULE-SET 匹配不到任何
+  # 域名，MEGA 会一路落到订阅兜底规则，表现为"规则没生效"。
+  - DOMAIN-SUFFIX,mega.nz,🌐 MEGA
+  - DOMAIN-SUFFIX,mega.io,🌐 MEGA
+  - DOMAIN-SUFFIX,mega.co.nz,🌐 MEGA
+  - DOMAIN-SUFFIX,transfer.it,🌐 MEGA
   - RULE-SET,mega-site,🌐 MEGA
   # AS203055 = MEGA-LIMITED-AS，AS205809 = MEGA Privacy Kft.
   - IP-ASN,203055,🌐 MEGA,no-resolve
