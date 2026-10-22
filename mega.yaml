@@ -1,0 +1,36 @@
+# MEGA 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
+#   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
+#   rules 是顺序匹配：必须前插，追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）。
+#   分组里的 🚀节点选择 / ♻️自动选择 取自常见机场配置；换订阅时只改这两行。
+
+proxy-groups+:
+  - name: 🌐 MEGA
+    type: select
+    proxies:
+      - 🚀节点选择
+      - ♻️自动选择
+      - DIRECT
+
++rules:
+  - DOMAIN-SUFFIX,mega.nz,🌐 MEGA
+  - DOMAIN-SUFFIX,mega.io,🌐 MEGA
+  - DOMAIN-SUFFIX,mega.co.nz,🌐 MEGA
+  # 以下网段是 MEGA 自有 ASN 的已宣告前缀（AS203055 MEGA-LIMITED-AS + AS205809 MEGA Privacy Kft.），
+  # 域名被污染或 App 直连 IP 时兜底；no-resolve 避免为纯 IP 流量多打一次 DNS。
+  - IP-CIDR,31.216.144.0/22,🌐 MEGA,no-resolve
+  - IP-CIDR,31.216.148.0/24,🌐 MEGA,no-resolve
+  - IP-CIDR,66.203.124.0/22,🌐 MEGA,no-resolve
+  - IP-CIDR,82.21.172.0/24,🌐 MEGA,no-resolve
+  - IP-CIDR,82.29.203.0/24,🌐 MEGA,no-resolve
+  - IP-CIDR,82.29.204.0/22,🌐 MEGA,no-resolve
+  - IP-CIDR,89.44.168.0/23,🌐 MEGA,no-resolve
+  - IP-CIDR,94.24.36.0/23,🌐 MEGA,no-resolve
+  - IP-CIDR,162.208.16.0/24,🌐 MEGA,no-resolve
+  - IP-CIDR,185.206.24.0/22,🌐 MEGA,no-resolve
+  - IP-CIDR,217.180.20.0/23,🌐 MEGA,no-resolve
+  - IP-CIDR6,2001:67c:1998::/48,🌐 MEGA,no-resolve
+  - IP-CIDR6,2001:678:25c::/48,🌐 MEGA,no-resolve
+  - IP-CIDR6,2a09:a381::/39,🌐 MEGA,no-resolve
+  - IP-CIDR6,2a0b:e40::/31,🌐 MEGA,no-resolve
+  - IP-CIDR6,2a0b:e42::/31,🌐 MEGA,no-resolve
+  - IP-CIDR6,2a0b:e44::/31,🌐 MEGA,no-resolve
