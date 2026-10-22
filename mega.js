@@ -1,4 +1,4 @@
-// Version 2.2.0 · 2026-10-22 22:55 ── hand-write core MEGA domains as a fallback ahead of the rule-provider
+// Version 2.3.0 · 2026-10-22 23:09 ── restore explicit CIDRs ahead of IP-ASN
 // MEGA 覆写（JavaScript）。与 mega.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
 //   MEGA 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
@@ -87,6 +87,15 @@ function main(config) {
     'IP-ASN,203055,' + GROUP + ',no-resolve',
     'IP-ASN,205809,' + GROUP + ',no-resolve'
   ];
+  // 网段兜底：IP-ASN 依赖 ASN.mmdb 加载成功，网段不依赖任何数据文件
+  var cidrs = ['31.216.144.0/22','31.216.148.0/24','66.203.124.0/22','82.21.172.0/24',
+    '82.29.203.0/24','82.29.204.0/22','89.44.168.0/23','94.24.36.0/23',
+    '162.208.16.0/24','185.206.24.0/22','217.180.20.0/23'];
+  var cidrs6 = ['2001:67c:1998::/48','2001:678:25c::/48','2a09:a381::/39',
+    '2a0b:e40::/31','2a0b:e42::/31','2a0b:e44::/31'];
+  var k;
+  for (k = 0; k < cidrs.length; k++) mega.push('IP-CIDR,' + cidrs[k] + ',' + GROUP + ',no-resolve');
+  for (k = 0; k < cidrs6.length; k++) mega.push('IP-CIDR6,' + cidrs6[k] + ',' + GROUP + ',no-resolve');
 
   // 剔掉目标组是本组的旧规则：旧版写过 DOMAIN-SUFFIX/IP-CIDR，只比对全等会留下残骸
   var oldRules = config.rules || [];

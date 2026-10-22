@@ -1,4 +1,4 @@
-# Version 2.2.0 · 2026-10-22 22:55 ── hand-write core MEGA domains as a fallback ahead of the rule-provider
+# Version 2.3.0 · 2026-10-22 23:09 ── restore explicit CIDRs ahead of IP-ASN
 # MEGA 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
 #   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
@@ -45,6 +45,25 @@ rule-providers:
   - DOMAIN-SUFFIX,mega.co.nz,🌐 MEGA
   - DOMAIN-SUFFIX,transfer.it,🌐 MEGA
   - RULE-SET,mega-site,🌐 MEGA
+  # 具体网段写在 IP-ASN 前面：IP-ASN 依赖 ASN.mmdb 被正确加载，加载不上时这条会整体失效，
+  # 网段不依赖任何数据文件，是唯一不会静默失效的兜底。AS203055 的前缀粒度碎到有 33 条 /48，
+  - IP-CIDR,31.216.144.0/22,🌐 MEGA,no-resolve
+  - IP-CIDR,31.216.148.0/24,🌐 MEGA,no-resolve
+  - IP-CIDR,66.203.124.0/22,🌐 MEGA,no-resolve
+  - IP-CIDR,82.21.172.0/24,🌐 MEGA,no-resolve
+  - IP-CIDR,82.29.203.0/24,🌐 MEGA,no-resolve
+  - IP-CIDR,82.29.204.0/22,🌐 MEGA,no-resolve
+  - IP-CIDR,89.44.168.0/23,🌐 MEGA,no-resolve
+  - IP-CIDR,94.24.36.0/23,🌐 MEGA,no-resolve
+  - IP-CIDR,162.208.16.0/24,🌐 MEGA,no-resolve
+  - IP-CIDR,185.206.24.0/22,🌐 MEGA,no-resolve
+  - IP-CIDR,217.180.20.0/23,🌐 MEGA,no-resolve
+  - IP-CIDR6,2001:67c:1998::/48,🌐 MEGA,no-resolve
+  - IP-CIDR6,2001:678:25c::/48,🌐 MEGA,no-resolve
+  - IP-CIDR6,2a09:a381::/39,🌐 MEGA,no-resolve
+  - IP-CIDR6,2a0b:e40::/31,🌐 MEGA,no-resolve
+  - IP-CIDR6,2a0b:e42::/31,🌐 MEGA,no-resolve
+  - IP-CIDR6,2a0b:e44::/31,🌐 MEGA,no-resolve
   # AS203055 = MEGA-LIMITED-AS，AS205809 = MEGA Privacy Kft.
   - IP-ASN,203055,🌐 MEGA,no-resolve
   - IP-ASN,205809,🌐 MEGA,no-resolve
