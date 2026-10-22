@@ -1,4 +1,4 @@
-// Version 2.4.0 · 2026-10-22 23:14 ── switch MEGA group to url-test probed against mega.nz
+// Version 2.5.0 · 2026-10-22 23:22 ── probe the MEGA group with generate_204 instead of mega.nz
 // MEGA 覆写（JavaScript）。与 mega.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
 //   MEGA 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
@@ -37,7 +37,7 @@ function main(config) {
   var group = {
     name: GROUP,
     type: 'url-test',
-    url: 'https://mega.nz/',
+    url: 'https://www.gstatic.com/generate_204',
     interval: 300,
     tolerance: 50,
     icon: ICON,
