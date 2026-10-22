@@ -259,6 +259,8 @@ rule-providers:
 ## 分组里的节点从哪来
 
 - **YAML**：`include-all: true` 由内核全量并入。简单，但机场塞的伪节点（`剩余流量：xx GB`、`套餐到期`）挡不住——`exclude-filter` 只在 groupbase 对 provider 提供的节点生效，管不到 `include-all` 加进来的项。
+
+**组类型选 `url-test` 而不是 `select`**：`select` 选中的节点断线后不会自己换，日志上表现为「规则明明命中了本组，却连不上」。测速地址要用**目标站点自己**（MEGA 组用 `https://mega.nz/`），别用 `generate_204`——204 通只说明节点活着，不代表它能连上目标。代价是 `url-test` 的成员只能是节点，运营商聚合组（`✨移动推荐节点` 这类）进不了本组。
 - **JS**：遍历 `config.proxies` 自己取名字并按正则剔伪节点；节点走 `proxy-providers` 时用 `use` 整包引入。
 - **`include-all` 不含 proxy-groups**：只并 `proxies` 里的节点和 provider 的节点。`♻️自动选择`、`✨移动推荐节点` 这类**聚合组**想出现在本组首选项里，必须显式写进 `proxies`。YAML 版只能写死组名（名字错了内核拒绝整份配置），JS 版按 `/推荐节点$/` 后缀匹配，机场换 emoji 或加运营商都不用改。
 - 组头只引用订阅里**真实存在**的组名。硬写一个不存在的组会让内核整个配置校验失败，换订阅就炸。

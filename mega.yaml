@@ -1,4 +1,4 @@
-# Version 2.3.0 · 2026-10-22 23:09 ── restore explicit CIDRs ahead of IP-ASN
+# Version 2.4.0 · 2026-10-22 23:14 ── switch MEGA group to url-test probed against mega.nz
 # MEGA 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
 #   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
@@ -16,16 +16,17 @@
 #   exclude-filter 只对 provider 节点生效、管不到 include-all 的项 —— 要剔掉伪节点请改用 mega.js。
 
 +proxy-groups:
+  # url-test 而不是 select：select 选中的节点一旦断了就一直用它，日志上表现为
+  # IPCIDR 命中本组却连不上（dial tcp ... i/o timeout）。测速地址特意用 mega.nz，
+  # 只有真能连上 MEGA 的节点才算可用；用 gstatic 的 204 会放过「204 通但连不上 MEGA」的节点。
+  # 代价：url-test 的成员只能是节点，不能含其它 proxy-group，运营商聚合组因此不进本组。
   - name: 🌐 MEGA
-    type: select
+    type: url-test
+    url: https://mega.nz/
+    interval: 300
+    tolerance: 50
     icon: https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/mega.png
     include-all: true
-    proxies:
-      - ♻️自动选择
-      - 🚀节点选择
-      # 运营商聚合组（✨移动推荐节点 / 电信 / 联通）也是 proxy-group，include-all 并不到，
-      # 必须写死组名；而 YAML 没法按后缀匹配、写错组名内核会拒绝整份配置 —— 要这三个请用 mega.js。
-      - DIRECT
 
 rule-providers:
   mega-site:
