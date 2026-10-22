@@ -1,0 +1,35 @@
+# Version 1.0.0 · 2026-10-23 00:05 ── add Boosty: domain-only group, shared hosting so no IP rules
+# Boosty 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
+#   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
+#   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
+#   Boosty 会出现在列表最顶端；要排在「节点选择」「自动选择」之后请改用 boosty.js。
+#   rules 是顺序匹配：必须前插，追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）。
+#
+#   只有域名规则，没有 IP 规则，原因：
+#     - geosite 没有 boosty 分类（v2fly 的 data/boosty 是 404），boosty.to 只挂在
+#       MAILRU-GROUP / CATEGORY-RU / GEOLOCATION-!CN 下，用哪个都会顺带拖进一整片无关域名，
+#       所以域名手写。
+#     - boosty.to 解析到 95.181.179.179（AS42632 MnogoByte），是俄罗斯托管商的共享段，
+#       同段还跑着别的客户站点，按 IP 收必误伤，因此不写 IP-CIDR / IP-ASN。
+#
+#   include-all 让组自动并入订阅里的全部节点，换订阅、加节点都不用改本文件。代价：机场塞的
+#   伪节点（"剩余流量：948 GB"这类）也会进组，且 exclude-filter 管不到 include-all 的项
+#   —— 要剔掉伪节点请改用 boosty.js。
+
++proxy-groups:
+  # select 而不是 url-test：只有 select 的成员能放 proxy-group，才能把「自动选择」「节点选择」
+  # 挑进本组。代价是选中的节点断了不会自己换 —— 到代理页手动切一个能连的节点。
+  # 这两个组名硬写在这里：订阅里没有该组的话内核会整份配置校验失败，boosty.js 会先检测再引用。
+  - name: 💰 Boosty
+    type: select
+    icon: https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/boosty.png
+    include-all: true
+    proxies:
+      - ♻️自动选择
+      - 🚀节点选择
+      - DIRECT
+
++rules:
+  # rules 顺序匹配，必须前插：追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）
+  # DOMAIN-SUFFIX 自带子域（media./api./static. 这些），不用逐条写
+  - DOMAIN-SUFFIX,boosty.to,💰 Boosty

@@ -66,6 +66,12 @@ rest.splice(insertAt, 0, group);              // 锚点都不存在时 insertAt=
 
 JS 形态约定：定义 `main(config)`，入参出参都是整份配置对象；goja 执行，2 秒超时，输出上限 1 MB。
 
+## 每个应用一套文件
+
+`mega.{yaml,js}`、`boosty.{yaml,js}`，每个应用一组，互不引用。新加应用照抄结构：`<app>.yaml` 给不写脚本的人，`<app>.js` 多一层伪节点过滤和动态组引用，两版规则内容必须等价。
+
+`boosty` 是个反例值得记住：它的 IP 在托管商共享段（AS42632 MnogoByte），按 IP 收必误伤；geosite 也没有独立分类。所以只有一条 `DOMAIN-SUFFIX`。**不是每个应用都能凑出「域名 + ASN + 网段」三层，凑不出就别硬凑。**
+
 ## 图标设计
 
 ### 渲染链路

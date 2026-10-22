@@ -17,6 +17,8 @@ Mishka → 配置 → 覆写 → 新增：
 ```
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/mega.yaml
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/mega.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/boosty.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/boosty.js
 ```
 
 保存后在「订阅」页把覆写勾选给目标订阅。多个覆写按勾选顺序依次套用，前一个的输出是后一个的输入。
@@ -25,10 +27,21 @@ https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/mega.js
 
 | 文件 | 应用 | 内容 |
 |------|------|------|
-| `mega.js` | MEGA 网盘 | `🌐 MEGA` 分组（**自动并入订阅全部节点**，剔掉机场伪节点）+ 域名与自有 ASN 网段规则（前插） |
+| `mega.js` | MEGA 网盘 | `🌐 MEGA` 分组（**自动并入订阅全部节点**，剔掉机场伪节点）+ `GEOSITE,mega` 与自有 ASN 的网段规则（前插） |
 | `mega.yaml` | MEGA 网盘 | 同上，但节点靠 `include-all` 全量并入（伪节点会一起进来） |
+| `boosty.js` | Boosty | `💰 Boosty` 分组（同上）+ `DOMAIN-SUFFIX,boosty.to` 一条规则 |
+| `boosty.yaml` | Boosty | 同上，节点靠 `include-all` |
 
 图标怎么设计、规则怎么维护、改动后自查什么，见 [AGENTS.md](AGENTS.md)。
+
+## Boosty 只有域名规则
+
+`boosty.to` 落在俄罗斯托管商 AS42632（MnogoByte）的共享段，同段还有别的客户站点，按 IP 收会误伤；
+geosite 也没有 `boosty` 分类（只在 `MAILRU-GROUP` / `CATEGORY-RU` / `GEOLOCATION-!CN` 里挂着），
+用哪个现成分类都会顺带拖进一整片无关域名。所以规则就一条 `DOMAIN-SUFFIX,boosty.to`，
+`DOMAIN-SUFFIX` 自带 `media.` / `api.` 这些子域。
+
+另需注意：能打开 Boosty 取决于节点出口 IP 是否被对方放行，不是选了某个国家就一定行。
 
 ## 分组里的节点从哪来
 
