@@ -9,7 +9,7 @@
 proxy-groups+:
   - name: 🌐 MEGA
     type: select
-    icon: https://fastly.jsdelivr.net/gh/Vstory/mihomo-overrides@main/icons/mega.png
+    icon: https://fastly.jsdelivr.net/gh/Vstory/mihomo-overrides@main/icons/mega.png?v=2
     include-all: true
     proxies:
       - ♻️自动选择

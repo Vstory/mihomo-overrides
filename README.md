@@ -63,7 +63,7 @@ Mishka 内核按 PC 版的键位规则合并（`app/src/main/native/mishka_core/
 图标文件放在 `icons/`，取自官方 180×180 的 apple-touch-icon，已把外围白底做成透明：
 
 ```
-https://fastly.jsdelivr.net/gh/Vstory/mihomo-overrides@main/icons/mega.png
+https://fastly.jsdelivr.net/gh/Vstory/mihomo-overrides@main/icons/mega.png?v=2
 ```
 
 注意只能用 PNG / JPEG / WebP——解码走 `BitmapFactory`，`.ico` 解不出来。
