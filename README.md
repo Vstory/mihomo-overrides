@@ -55,6 +55,19 @@ Mishka 内核按 PC 版的键位规则合并（`app/src/main/native/mishka_core/
 `rules` 顺序匹配，所以用 `+rules` 前插——追加到末尾会被订阅的兜底规则先吃掉，等于永不命中。
 分组用 `proxy-groups+` 追加，不动订阅原有分组。
 
+## 组图标
+
+分组用 mihomo 的 `icon:` 字段，值是图片 URL。Mishka 的 `IconLoader` 会下载并缓存到磁盘，
+代理运行中时自动经 mihomo mixed-port 取图，所以图标也不会卡在墙外。
+
+图标文件放在 `icons/`，取自官方 180×180 的 apple-touch-icon，已把外围白底做成透明：
+
+```
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/mega.png
+```
+
+注意只能用 PNG / JPEG / WebP——解码走 `BitmapFactory`，`.ico` 解不出来。
+
 ## 适配自己的订阅
 
 分组里的 `🚀节点选择`、`♻️自动选择` 是引用订阅中已存在的分组名。订阅不同就改这两行，

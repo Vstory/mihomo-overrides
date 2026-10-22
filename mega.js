@@ -4,6 +4,8 @@
 //   内核约定：main(config) 的入参出参都是整份配置对象（goja 执行、2 秒超时、输出上限 1 MB）。
 function main(config) {
   var GROUP = '🌐 MEGA';
+  // 组图标走 Mishka 的 IconLoader：网络图片 + 磁盘缓存，PNG 最好（BitmapFactory 不解码 .ico）
+  var ICON = 'https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/mega.png';
   // 机场惯用伪节点名，命中就不进组（想连这些信息节点也能选的话，删掉这一行）
   var FAKE = /剩余流量|剩余|距离下次|套餐到期|过期|到期时间|官网|重置|流量重置/;
 
@@ -37,7 +39,7 @@ function main(config) {
     if (Object.prototype.hasOwnProperty.call(pp, k)) use.push(k);
   }
 
-  var group = { name: GROUP, type: 'select', proxies: lead.concat(nodeNames) };
+  var group = { name: GROUP, type: 'select', icon: ICON, proxies: lead.concat(nodeNames) };
   if (use.length > 0) group.use = use;
 
   // 同名旧组先删：同一覆写被反复选中时不会叠出两个同名组
