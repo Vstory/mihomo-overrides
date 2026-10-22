@@ -9,7 +9,7 @@
 #   exclude-filter 只对 provider 节点生效、管不到 include-all 的项 —— 要剔掉伪节点请改用 mega.js。
 
 +proxy-groups:
-  - name: 🌐 MEGA
+  - name: MEGA
     type: select
     icon: https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/mega.png
     include-all: true
@@ -19,25 +19,25 @@
       - DIRECT
 
 +rules:
-  - DOMAIN-SUFFIX,mega.nz,🌐 MEGA
-  - DOMAIN-SUFFIX,mega.io,🌐 MEGA
-  - DOMAIN-SUFFIX,mega.co.nz,🌐 MEGA
+  - DOMAIN-SUFFIX,mega.nz,MEGA
+  - DOMAIN-SUFFIX,mega.io,MEGA
+  - DOMAIN-SUFFIX,mega.co.nz,MEGA
   # 以下网段是 MEGA 自有 ASN 的已宣告前缀（AS203055 MEGA-LIMITED-AS + AS205809 MEGA Privacy Kft.），
   # 域名被污染或 App 直连 IP 时兜底；no-resolve 避免为纯 IP 流量多打一次 DNS。
-  - IP-CIDR,31.216.144.0/22,🌐 MEGA,no-resolve
-  - IP-CIDR,31.216.148.0/24,🌐 MEGA,no-resolve
-  - IP-CIDR,66.203.124.0/22,🌐 MEGA,no-resolve
-  - IP-CIDR,82.21.172.0/24,🌐 MEGA,no-resolve
-  - IP-CIDR,82.29.203.0/24,🌐 MEGA,no-resolve
-  - IP-CIDR,82.29.204.0/22,🌐 MEGA,no-resolve
-  - IP-CIDR,89.44.168.0/23,🌐 MEGA,no-resolve
-  - IP-CIDR,94.24.36.0/23,🌐 MEGA,no-resolve
-  - IP-CIDR,162.208.16.0/24,🌐 MEGA,no-resolve
-  - IP-CIDR,185.206.24.0/22,🌐 MEGA,no-resolve
-  - IP-CIDR,217.180.20.0/23,🌐 MEGA,no-resolve
-  - IP-CIDR6,2001:67c:1998::/48,🌐 MEGA,no-resolve
-  - IP-CIDR6,2001:678:25c::/48,🌐 MEGA,no-resolve
-  - IP-CIDR6,2a09:a381::/39,🌐 MEGA,no-resolve
-  - IP-CIDR6,2a0b:e40::/31,🌐 MEGA,no-resolve
-  - IP-CIDR6,2a0b:e42::/31,🌐 MEGA,no-resolve
-  - IP-CIDR6,2a0b:e44::/31,🌐 MEGA,no-resolve
+  - IP-CIDR,31.216.144.0/22,MEGA,no-resolve
+  - IP-CIDR,31.216.148.0/24,MEGA,no-resolve
+  - IP-CIDR,66.203.124.0/22,MEGA,no-resolve
+  - IP-CIDR,82.21.172.0/24,MEGA,no-resolve
+  - IP-CIDR,82.29.203.0/24,MEGA,no-resolve
+  - IP-CIDR,82.29.204.0/22,MEGA,no-resolve
+  - IP-CIDR,89.44.168.0/23,MEGA,no-resolve
+  - IP-CIDR,94.24.36.0/23,MEGA,no-resolve
+  - IP-CIDR,162.208.16.0/24,MEGA,no-resolve
+  - IP-CIDR,185.206.24.0/22,MEGA,no-resolve
+  - IP-CIDR,217.180.20.0/23,MEGA,no-resolve
+  - IP-CIDR6,2001:67c:1998::/48,MEGA,no-resolve
+  - IP-CIDR6,2001:678:25c::/48,MEGA,no-resolve
+  - IP-CIDR6,2a09:a381::/39,MEGA,no-resolve
+  - IP-CIDR6,2a0b:e40::/31,MEGA,no-resolve
+  - IP-CIDR6,2a0b:e42::/31,MEGA,no-resolve
+  - IP-CIDR6,2a0b:e44::/31,MEGA,no-resolve
