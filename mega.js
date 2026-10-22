@@ -1,4 +1,4 @@
-// Version 2.8.0 · 2026-10-22 23:47 ── restore select with auto-select, node-select and DIRECT in the group head
+// Version 2.8.1 · 2026-10-22 23:52 ── keep auto-select, node-select and DIRECT at the very top of the group
 // MEGA 覆写（JavaScript）。与 mega.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
 //   MEGA 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
@@ -23,11 +23,11 @@ function main(config) {
   var lead = [];
   if (groupNames['♻️自动选择']) lead.push('♻️自动选择');
   if (groupNames['🚀节点选择']) lead.push('🚀节点选择');
+  lead.push('DIRECT');
   for (i = 0; i < groups.length; i++) {
     var leadName = groups[i] && groups[i].name;
     if (leadName && /推荐节点$/.test(leadName) && lead.indexOf(leadName) < 0) lead.push(leadName);
   }
-  lead.push('DIRECT');
 
   var nodeNames = [];
   var seen = {};
