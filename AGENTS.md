@@ -10,7 +10,7 @@
 - **版本头**：每个 `<app>.yaml` / `<app>.js` 的**第 1 行**放版本行（英文），两版必须同步：
 
   ```
-  # Version 2.0.0 · 2026-10-22 22:17 ── domains via rule-provider, IPs via IP-ASN
+  # Version 2.1.0 · 2026-10-22 22:23 ── include carrier aggregate groups in the group head
   ```
 
   YAML 用 `#`，JS 用 `//`。日期时间用本地时间（Asia/Shanghai）。语义化版本：改了规则来源/结构升主版本，增删域名或网段升次版本，只动注释与格式升修订号；摘要一句话说清这版改了什么。
