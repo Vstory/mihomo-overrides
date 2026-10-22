@@ -1,12 +1,14 @@
 # MEGA 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
+#   组用 +proxy-groups 前插：Mishka 按 GLOBAL.all 的顺序（即配置里 proxy-groups 的原始顺序）排列，
+#   用 proxy-groups+ 会被追加到列表最底部。
 #   rules 是顺序匹配：必须前插，追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）。
 #
 #   include-all 让组自动并入订阅里的全部节点（proxies 与 proxy-providers 都算），换订阅、
 #   加节点都不用改本文件。代价：机场塞的伪节点（"剩余流量：948 GB"这类）也会进组，且
 #   exclude-filter 只对 provider 节点生效、管不到 include-all 的项 —— 要剔掉伪节点请改用 mega.js。
 
-proxy-groups+:
++proxy-groups:
   - name: 🌐 MEGA
     type: select
     icon: https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/mega.png

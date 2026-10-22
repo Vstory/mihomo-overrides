@@ -19,6 +19,8 @@
 
 `rules` 是顺序匹配：**必须 `+rules` 前插**。追加到末尾等于永不命中——订阅自带的 `MATCH` 兜底规则会先把流量吃掉。
 
+同理，分组位置用 **`+proxy-groups`** 前插。Mishka 的代理组列表按 `ProxyViewModel` 里的 `globalGroup.all` 顺序排（`sortedBy { orderMap[it.name] }`），而这个顺序就是配置里 `proxy-groups` 的原始顺序；写成 `proxy-groups+` 会被追加到列表最底部。内核的 DAG 排序（`config/utils.go` 的 `proxyGroupsDagSort`）只影响内部解析，不改这个展示顺序。JS 形态对应 `unshift`，不是 `push`。
+
 JS 形态约定：定义 `main(config)`，入参出参都是整份配置对象；goja 执行，2 秒超时，输出上限 1 MB。
 
 ## 图标设计

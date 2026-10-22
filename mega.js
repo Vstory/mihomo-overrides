@@ -47,7 +47,7 @@ function main(config) {
   for (i = 0; i < groups.length; i++) {
     if (!groups[i] || groups[i].name !== GROUP) rest.push(groups[i]);
   }
-  rest.push(group);
+  rest.unshift(group);  // Mishka 按 proxy-groups 原始顺序排列，push 会掉到列表最底部
   config['proxy-groups'] = rest;
 
   var domains = ['mega.nz', 'mega.io', 'mega.co.nz'];
