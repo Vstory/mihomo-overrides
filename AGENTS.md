@@ -42,32 +42,40 @@ JS 形态约定：定义 `main(config)`，入参出参都是整份配置对象�
 
 `mihomo` group 的 `icon` 字段（`adapter/outboundgroup/selector.go` 里的 `"icon": s.Icon()`）→ REST `/proxies` → `ProxyGroupDetail.icon` → `ProxyGroupUi.icon` → Mishka 的 `GroupIcon` 组件 → `IconLoader.loadIcon(url)`。下载失败时回退成组名首字，所以看不到图标先怀疑下载，而不是怀疑字段没传。
 
+### 两种图标，别把形状做歪
+
+`GroupIcon` 是二选一：
+
+| 情况 | 走的分支 | 外观 |
+|------|----------|------|
+| `icon` 为空 | `DefaultGroupIcon` | 32dp **squircle（圆角 8dp，占边长 25%）** + `primary@10%` 半透明底 + 组名首字符（组名以 emoji 开头 → 彩色 emoji） |
+| `icon` 有值 | `Image` + `squircleClip(8.dp)` | 图片本身，同样 32dp 外框 |
+
+**关键**：`squircleClip` 裁的是一个内切圆？不是——它裁的是 25% 圆角的方块。所以贴边的圆形 logo 裁完仍是圆，比旁边的兜底方块大一圈，一排看过去不齐。
+
+要做成 **25% 圆角的方块**，被 `squircleClip` 再裁一次也不会有变化，形状就和邻居完全一致。
+
 ### 硬约束
 
 | 项 | 要求 | 原因 |
 |----|------|------|
 | 格式 | PNG / JPEG / WebP | 解码走 `BitmapFactory`，`.ico` 解不出来 |
 | 尺寸 | 180×180 | 显示 32dp，5x 屏约 160px，原生即可，不要插值放大 |
+| 形状 | 圆角方块，圆角 = 边长 × 8/32 = **25%** | 对齐 `DefaultGroupIcon` 的 squircle |
 | 背景 | 透明 | 深色主题下白底会变成一个白方块 |
-| 内容 | 贴边 | 原图四周留白会让图标比相邻组小一圈，看起来不齐 |
 | 地址 | 官方 raw，无参数 | 见「仓库约束」 |
 
-### 源图选择
+### 从官方图标生成
 
-用官方 apple-touch-icon：`https://mega.nz/apple-touch-icon.png`（180×180 PNG）。
-`favicon.ico` 里只有 16/32 px，放大必糊，不要用。
+源图用 `https://mega.nz/apple-touch-icon.png`（180×180 PNG）。`favicon.ico` 里只有 16/32 px，放大必糊。
 
-### 抠边：不要 flood fill，按距离场重绘
-
-**踩过的坑**：先用水 `floodfill` 从四角清白底，四角是透明了，但圆边抗锯齿像素是白与红的混合色，阈值扫不到，在深色背景上留一圈白点——看着像图标外面有光晕。
-
-正确做法：只信几何形状，边缘像素一律重涂主色。
+思路：取官方图里**主体色的字标蒙版**（白色 M 在红底上，按亮度分离），铺到按比例画好的圆角方块上。不要试图抠白底——见下面「踩过的坑」。
 
 ```python
-from PIL import Image
+from PIL import Image, ImageDraw
 import math
 
-SRC, S = 'apple-touch-icon.png', 180
+SRC, S, RADIUS = 'apple-touch-icon.png', 180, 45      # RADIUS = S * 8/32
 
 im = Image.open(SRC).convert('RGB')
 px = im.load()
@@ -75,46 +83,54 @@ xs, ys = [], []
 for y in range(im.size[1]):
     for x in range(im.size[0]):
         r, g, b = px[x, y]
-        if r > 120 and g < 100 and b < 100:      # 按主色阈值取内容包围盒
+        if r > 120 and g < 100 and b < 100:           # 按主色阈值取内容包围盒
             xs.append(x); ys.append(y)
 x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
-RED = px[(x0 + x1) // 2, y0 + 6]                  # 圆心附近取主色，避开中间的白色图形
+box = im.crop((x0, y0, x1 + 1, y1 + 1))
+bp = box.load()
+bw, bh = box.size
+RED = bp[bw // 2, 6]                                  # 圆心附近取主色，避开字标
 
-crop = im.crop((x0, y0, x1 + 1, y1 + 1)).resize((S, S), Image.LANCZOS)
-cp = crop.load()
+mask = Image.new('L', (bw, bh), 0)                    # 字标蒙版：圆内的高亮像素
+mp = mask.load()
+for y in range(bh):
+    for x in range(bw):
+        r, g, b = bp[x, y]
+        if math.hypot(x + 0.5 - bw / 2, y + 0.5 - bh / 2) < bw / 2 - 1 and r > 190 and g > 190 and b > 190:
+            mp[x, y] = 255
+
 out = Image.new('RGBA', (S, S), (0, 0, 0, 0))
-op = out.load()
-R = S / 2
-for y in range(S):
-    for x in range(S):
-        d = math.hypot(x + 0.5 - R, y + 0.5 - R)
-        if d >= R:
-            continue                              # 圆外全透明
-        if d > R - 2:                             # 边缘两像素涂主色，吃掉残留的浅色抗锯齿
-            op[x, y] = (RED[0], RED[1], RED[2], 255)
-        else:
-            op[x, y] = (*cp[x, y], 255)
-        if d > R - 1:                             # 最后一像素做 alpha 渐变
-            op[x, y] = op[x, y][:3] + (max(0, min(255, int(255 * (R - d)))),)
-out.save('icons/mega.png')
+ImageDraw.Draw(out).rounded_rectangle([0, 0, S - 1, S - 1], radius=RADIUS, fill=RED + (255,))
+out.paste(Image.new('RGBA', (S, S), (255, 255, 255, 255)), (0, 0), mask.resize((S, S), Image.LANCZOS))
+out.save('icons/<name>.png')
 ```
 
-只适用于圆形 logo。方形 logo 把距离判定换成圆角矩形的有向距离即可，思路不变：**边缘涂主色 + 最外一像素 alpha 渐变**。
+蒙版撑满画布，字标自然落在画布约六成的位置，与官方图标里字标占圆的比例一致——别再额外缩小。
+
+### 踩过的坑：不要用 flood fill 抠白底
+
+第一版从四角白底 flood fill 清透明，四角是干净了，但圆形抗锯齿边缘是白与红的混合色，阈值扫不到，深色背景下留一圈白点，看着像光晕。
+
+结论：**不要抠背景，直接重画几何形状**。圆角方块用 `rounded_rectangle` 画，边缘天然干净；要圆形版就把距离场那套拿来用（`icons/mega-round.png` 就是这么来的），边缘两像素涂主色、最外一像素 alpha 渐变。
 
 ### 验收
 
 ```bash
-# 1) 四角必须全透明
-python3 -c "from PIL import Image;i=Image.open('icons/mega.png');print(i.size,i.mode,i.getpixel((0,0))[3])"
+# 四角必须全透明
+python3 -c "from PIL import Image;i=Image.open('icons/<name>.png');print(i.size,i.mode,i.getpixel((0,0))[3])"
 
-# 2) 叠到卡片底色上放大 3 倍看边缘，不得有白点或灰边
+# 和兜底图标并排：同尺寸、同圆角，不能显大或显小
 python3 -c "
-from PIL import Image
-ic=Image.open('icons/mega.png');bg=Image.new('RGBA',(540,540),(28,28,30,255))
-bg.alpha_composite(ic.resize((540,540),Image.NEAREST));bg.convert('RGB').save('/tmp/preview.png')"
+from PIL import Image, ImageDraw
+S=128; c=Image.new('RGBA',(S*2+120,S+100),(36,36,38,255)); d=ImageDraw.Draw(c)
+for i in range(2): d.rounded_rectangle([60+i*(S+60),50,60+i*(S+60)+S-1,50+S-1],radius=int(S*8/32),fill=(58,60,68,255))
+c.alpha_composite(Image.open('icons/<name>.png').resize((S,S),Image.LANCZOS),(60+(S+60),50))
+c.convert('RGB').save('/tmp/shape_check.png')"
 ```
 
-`/tmp/preview.png` 用图片查看器打开确认。另外目视对比：圆形内切于方形画布，与相邻的圆角方块图标等高。
+`/tmp/shape_check.png` 打开看：方块的大小、圆角弧度要和灰色兜底块完全对上。
+
+圆形版另存为 `icons/<name>-round.png`（当前的 MEGA 圆形 logo 在 `icons/mega-round.png`），想切回官方形状就换 URL 末段。
 
 ### 改图标之后
 
