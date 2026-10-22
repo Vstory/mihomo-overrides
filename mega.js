@@ -5,7 +5,7 @@
 function main(config) {
   var GROUP = '🌐 MEGA';
   // 组图标走 Mishka 的 IconLoader：网络图片 + 磁盘缓存，PNG 最好（BitmapFactory 不解码 .ico）
-  var ICON = 'https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/mega.png';
+  var ICON = 'https://fastly.jsdelivr.net/gh/Vstory/mihomo-overrides@main/icons/mega.png';
   // 机场惯用伪节点名，命中就不进组（想连这些信息节点也能选的话，删掉这一行）
   var FAKE = /剩余流量|剩余|距离下次|套餐到期|过期|到期时间|官网|重置|流量重置/;
 
