@@ -7,10 +7,10 @@
 - **必须 public**：Mishka「新增覆写 → 远程下载」拿不到 token，私有仓库给不出可匿名访问的 raw 地址。
 - **一应用两形态**：`<app>.yaml`（键位覆写）与 `<app>.js`（`main(config)`），规则内容必须一致，改一个就得同步另一个。**分组位置是唯一的例外**：键位只有前插/追加，做不到插到指定位置，YAML 版固定前插，需要精确落位只能靠 JS 的 `splice`。
 - **图标与图标地址**只用 GitHub 官方 raw：`https://raw.githubusercontent.com/<owner>/<repo>/main/icons/<name>.png`，不加查询参数。
-- **版本头**：每个 `<app>.yaml` / `<app>.js` 的**第 1 行**放版本行，两版必须同步：
+- **版本头**：每个 `<app>.yaml` / `<app>.js` 的**第 1 行**放版本行（英文），两版必须同步：
 
   ```
-  # 版本 2.0.0 · 2026-10-22 22:16 ── 域名改走 rule-provider，IP 改走 IP-ASN
+  # Version 2.0.0 · 2026-10-22 22:17 ── domains via rule-provider, IPs via IP-ASN
   ```
 
   YAML 用 `#`，JS 用 `//`。日期时间用本地时间（Asia/Shanghai）。语义化版本：改了规则来源/结构升主版本，增删域名或网段升次版本，只动注释与格式升修订号；摘要一句话说清这版改了什么。
@@ -24,7 +24,7 @@
 3. **写 `<app>.yaml`**：`+proxy-groups` 建组（带 `icon`），`+rules` 前插规则。
 4. **写 `<app>.js`**：规则与 YAML 等价；组位置用 `splice` 算，可精确落到某个组之后。
 5. **校验**：`python3 -c "import yaml;yaml.safe_load(open('<app>.yaml'))"`、`node --check <app>.js`，再用真实订阅结构跑一遍 `main(config)` 看组顺序和规则目标。
-6. **版本头**：两个文件的第 1 行写 `版本 X.Y.Z · YYYY-MM-DD HH:MM ── 摘要`，见「仓库约束」。
+6. **版本头**：两个文件的第 1 行写 `Version X.Y.Z · YYYY-MM-DD HH:MM ── English summary`，见「仓库约束」。
 7. **交付提醒**：图标地址不变时，使用者必须「清应用缓存 → 强制停止 → 重开」才能看到新图，原因见「改图标之后」。
 8. **组名**：跟订阅同样的命名风格（带 emoji 前缀），`name` 不要为了图标去改，见「组名保持原样」。
 

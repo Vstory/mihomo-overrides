@@ -1,4 +1,4 @@
-# 版本 2.0.0 · 2026-10-22 22:16 ── 域名改走 rule-provider，IP 改走 IP-ASN
+# Version 2.0.0 · 2026-10-22 22:17 ── domains via rule-provider, IPs via IP-ASN
 # MEGA 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
 #   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
