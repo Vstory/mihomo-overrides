@@ -83,9 +83,7 @@ function main(config) {
     'DOMAIN-SUFFIX,mega.io,' + GROUP,
     'DOMAIN-SUFFIX,mega.co.nz,' + GROUP,
     'DOMAIN-SUFFIX,transfer.it,' + GROUP,
-    'RULE-SET,mega-site,' + GROUP,
-    'IP-ASN,203055,' + GROUP + ',no-resolve',
-    'IP-ASN,205809,' + GROUP + ',no-resolve'
+    'RULE-SET,mega-site,' + GROUP
   ];
   // 网段兜底：IP-ASN 依赖 ASN.mmdb 加载成功，网段不依赖任何数据文件
   var cidrs = ['31.216.144.0/22','31.216.148.0/24','66.203.124.0/22','82.21.172.0/24',
@@ -96,6 +94,8 @@ function main(config) {
   var k;
   for (k = 0; k < cidrs.length; k++) mega.push('IP-CIDR,' + cidrs[k] + ',' + GROUP + ',no-resolve');
   for (k = 0; k < cidrs6.length; k++) mega.push('IP-CIDR6,' + cidrs6[k] + ',' + GROUP + ',no-resolve');
+  mega.push('IP-ASN,203055,' + GROUP + ',no-resolve');
+  mega.push('IP-ASN,205809,' + GROUP + ',no-resolve');
 
   // 剔掉目标组是本组的旧规则：旧版写过 DOMAIN-SUFFIX/IP-CIDR，只比对全等会留下残骸
   var oldRules = config.rules || [];
