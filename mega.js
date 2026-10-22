@@ -47,7 +47,14 @@ function main(config) {
   for (i = 0; i < groups.length; i++) {
     if (!groups[i] || groups[i].name !== GROUP) rest.push(groups[i]);
   }
-  rest.unshift(group);  // Mishka 按 proxy-groups 原始顺序排列，push 会掉到列表最底部
+  // 组位置：插到「节点选择」「自动选择」之后。YAML 覆写只有前插/追加两种键位，
+  // 落不到指定位置，所以这个版位只能在 JS 里算；两个锚点都不存在时退回最前
+  var anchors = ['🚀节点选择', '♻️自动选择'];
+  var insertAt = 0;
+  for (i = 0; i < rest.length; i++) {
+    if (rest[i] && anchors.indexOf(rest[i].name) >= 0 && i + 1 > insertAt) insertAt = i + 1;
+  }
+  rest.splice(insertAt, 0, group);
   config['proxy-groups'] = rest;
 
   var domains = ['mega.nz', 'mega.io', 'mega.co.nz'];

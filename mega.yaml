@@ -1,7 +1,7 @@
 # MEGA 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
-#   组用 +proxy-groups 前插：Mishka 按 GLOBAL.all 的顺序（即配置里 proxy-groups 的原始顺序）排列，
-#   用 proxy-groups+ 会被追加到列表最底部。
+#   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
+#   MEGA 会出现在列表最顶端；要排在「节点选择」「自动选择」之后请改用 mega.js（那边用 splice 算位置）。
 #   rules 是顺序匹配：必须前插，追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）。
 #
 #   include-all 让组自动并入订阅里的全部节点（proxies 与 proxy-providers 都算），换订阅、

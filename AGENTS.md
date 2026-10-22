@@ -5,7 +5,7 @@
 ## 仓库约束
 
 - **必须 public**：Mishka「新增覆写 → 远程下载」拿不到 token，私有仓库给不出可匿名访问的 raw 地址。
-- **一应用两形态**：`<app>.yaml`（键位覆写）与 `<app>.js`（`main(config)`），内容必须等价，改一个就得同步另一个。
+- **一应用两形态**：`<app>.yaml`（键位覆写）与 `<app>.js`（`main(config)`），规则内容必须一致，改一个就得同步另一个。**分组位置是唯一的例外**：键位只有前插/追加，做不到插到指定位置，YAML 版固定前插，需要精确落位只能靠 JS 的 `splice`。
 - **图标与图标地址**只用 GitHub 官方 raw：`https://raw.githubusercontent.com/<owner>/<repo>/main/icons/<name>.png`，不加查询参数。
 
 ## 覆写键位（源码确认，不要凭印象写）
@@ -19,7 +19,20 @@
 
 `rules` 是顺序匹配：**必须 `+rules` 前插**。追加到末尾等于永不命中——订阅自带的 `MATCH` 兜底规则会先把流量吃掉。
 
-同理，分组位置用 **`+proxy-groups`** 前插。Mishka 的代理组列表按 `ProxyViewModel` 里的 `globalGroup.all` 顺序排（`sortedBy { orderMap[it.name] }`），而这个顺序就是配置里 `proxy-groups` 的原始顺序；写成 `proxy-groups+` 会被追加到列表最底部。内核的 DAG 排序（`config/utils.go` 的 `proxyGroupsDagSort`）只影响内部解析，不改这个展示顺序。JS 形态对应 `unshift`，不是 `push`。
+同理，分组位置用 **`+proxy-groups`** 前插。Mishka 的代理组列表按 `ProxyViewModel` 里的 `globalGroup.all` 顺序排（`sortedBy { orderMap[it.name] }`），而这个顺序就是配置里 `proxy-groups` 的原始顺序；写成 `proxy-groups+` 会被追加到列表最底部。内核的 DAG 排序（`config/utils.go` 的 `proxyGroupsDagSort`）只影响内部解析，不改这个展示顺序。JS 形态对应 `unshift`（不是 `push`）。
+
+要在指定位置插入，得在 JS 里算下标：
+
+```js
+var anchors = ['🚀节点选择', '♻️自动选择'];   // 想排在它们后面
+var insertAt = 0;
+for (i = 0; i < rest.length; i++) {
+  if (rest[i] && anchors.indexOf(rest[i].name) >= 0 && i + 1 > insertAt) insertAt = i + 1;
+}
+rest.splice(insertAt, 0, group);              // 锚点都不存在时 insertAt=0，退回最前
+```
+
+锚点名要按订阅实际取值写，且必须能在 `rest` 里匹配到；匹配不到就退化成插到最前，不会报错。
 
 JS 形态约定：定义 `main(config)`，入参出参都是整份配置对象；goja 执行，2 秒超时，输出上限 1 MB。
 
