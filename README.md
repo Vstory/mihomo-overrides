@@ -28,6 +28,8 @@ https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/mega.js
 | `mega.js` | MEGA 网盘 | `🌐 MEGA` 分组（**自动并入订阅全部节点**，剔掉机场伪节点）+ 域名与自有 ASN 网段规则（前插） |
 | `mega.yaml` | MEGA 网盘 | 同上，但节点靠 `include-all` 全量并入（伪节点会一起进来） |
 
+图标怎么设计、规则怎么维护、改动后自查什么，见 [AGENTS.md](AGENTS.md)。
+
 ## 分组里的节点从哪来
 
 两个文件都**不需要手写节点名**，订阅换节点、加节点都不用改：
