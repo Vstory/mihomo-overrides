@@ -170,61 +170,67 @@ Mishka 的 `IconDiskCache` 对每个 URL **没有 TTL、没有版本校验**：`
 
 ## MEGA 规则维护
 
-### 分层
+### 分层与来源
 
-1. **域名层**：`DOMAIN-SUFFIX,mega.nz` / `mega.io` / `mega.co.nz`，覆盖绝大多数请求。
-2. **IP 层**：MEGA 自有 ASN 的公告前缀，兜住域名被污染、或客户端直接连 IP 的情况。
+| 层 | 写法 | 来源 | 为什么这样 |
+|----|------|------|-----------|
+| 域名 | `RULE-SET,mega-site,🌐 MEGA` | rule-provider 拉 `meta-rules-dat/meta/geo/geosite/mega.mrs` | 官方分类已经维护好 7 条域名，不用手抄，也不会漏新增域名 |
+| IP | `IP-ASN,203055` / `IP-ASN,205809` | 内核按 ASN 匹配，依赖 `ASN.mmdb` | 不用手抄前缀表；Mishka 的 assets 里就有 ASN.mmdb，CI 还会校验它在包里 |
 
-只收 MEGA 自有 ASN 的前缀，**不收第三方 CDN / 云厂商段**——那些段是共享的，收进来会误伤。
+AS203055 = MEGA-LIMITED-AS，AS205809 = MEGA Privacy Kft.。只认 MEGA 自有 ASN，**不收第三方 CDN / 云厂商段**——那些段是共享的，收进来会误伤。
 
-| ASN | 名称 |
-|-----|------|
-| AS203055 | MEGA-LIMITED-AS |
-| AS205809 | MEGA Privacy Kft. |
+### 两个不该走的路
+
+**不要手写域名清单。** 曾经只写 `mega.nz` / `mega.io` / `mega.co.nz` 三条，实测漏掉：
+
+| 漏掉的 | 是什么 |
+|--------|--------|
+| `transfer.it` | MEGA 的传输站，分享链接走这里 |
+| `megapay.nz` | 支付 |
+| `megaad.nz` | 广告 |
+| `megas4.com` | 业务域名 |
+
+**不要用 `GEOSITE,mega`。** 它依赖内置 `geosite.dat` 里是否打包了 `mega` 分类，而那是个随版本变化的二进制；查不到分类时规则静默失效，排查成本很高。rule-provider 不依赖本地数据版本，内容随上游更新。
+
+**也不要再手抄 IP 前缀。** 旧版抄了 20 条（v4 11 条、v6 6 条 + 聚合注释），AS205809 的前缀粒度碎到有 33 条 /48，靠手工维护必然滞后。`IP-ASN` 一行顶一片。
 
 ### 顺序与写法
 
 - 域名规则排在 IP 规则**前面**：域名能判就直接判，不必等解析。
-- 所有 IP 规则带 `no-resolve`：不让内核为了匹配规则多发一次 DNS，纯 IP 流量不该触发解析。
-- IPv6 前缀写 `IP-CIDR6`，不要塞进 `IP-CIDR`。
+- IP 规则带 `no-resolve`：纯 IP 流量不该为了匹配规则多发一次 DNS。
 - 组名 `🌐 MEGA` 必须与 `+proxy-groups` 里逐字一致，含 emoji 与中间的空格。
+- provider 名用 `mega-site`，避免与订阅自带的 provider 重名；`path` 落在 `./ruleset/` 下，`interval` 86400。
 
-### 当前基线（2026-10 从 RIPEstat 拉的公告前缀）
+### 规则段现貌
 
-MEGA 的前缀粒度很碎（AS205809 有 33 条 /48），配置里按相邻段聚合，代价是覆盖同段内的邻接分配：
+```yaml
+rule-providers:
+  mega-site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/mega.mrs
+    path: ./ruleset/mega.mrs
+    interval: 86400
 
-| 配置里的写法 | 实际包含 |
-|--------------|----------|
-| `31.216.144.0/22` | 31.216.144.0/24 ~ 147.0/24（AS203055） |
-| `31.216.148.0/24` | 单条 |
-| `66.203.124.0/22` | 124.0/24 + 125.0/24（AS203055）与 126.0/23（AS205809） |
-| `82.29.204.0/22` | 204.0/24 ~ 207.0/24，`82.29.203.0/24` 单独写 |
-| `89.44.168.0/23`、`94.24.36.0/23`、`217.180.20.0/23` | 各含两个 /24 |
-| `162.208.16.0/24`、`185.206.24.0/22`、`82.21.172.0/24` | AS205809 |
-| `2a0b:e40::/31`、`e42::/31`、`e44::/31` | 每个 /31 覆盖 MEGA 在该 /32 内的若干 /48 |
-| `2a09:a381::/39` | 覆盖 `2a09:a381::/40` 与 `2a09:a381:100::/40`；同 /39 内的邻接段（a380、a382~a3ff）也一并带上，不是 MEGA 专属 |
-| `2001:67c:1998::/48`、`2001:678:25c::/48` | 各单条 |
-
-### 更新
-
-```bash
-for asn in AS203055 AS205809; do
-  echo "=== $asn ==="
-  curl -s "https://stat.ripe.net/data/announced-prefixes/data.json?resource=$asn" |
-    python3 -c "import json,sys;[print(p['prefix']) for p in json.load(sys.stdin)['data']['prefixes']]"
-done
++rules:
+  - RULE-SET,mega-site,🌐 MEGA
+  - IP-ASN,203055,🌐 MEGA,no-resolve
+  - IP-ASN,205809,🌐 MEGA,no-resolve
 ```
 
-与上表比对后改 `mega.yaml` 与 `mega.js` 两份（`mega.js` 里的 `domains` / `cidrs` / `cidrs6` 三个数组）。
+`rule-providers` 是 map，用**普通键**深度合并（不是 `+rule-providers`，`+` 只对数组有意义）；`rules` 是数组，必须 `+rules` 前插。
 
 ### 改动后自查
 
 - [ ] 规则段是 `+rules`，没写成 `rules`
-- [ ] 域名在前、IP 在后，IP 规则全部 `no-resolve`
+- [ ] provider 段是普通 `rule-providers`，没加 `+`
+- [ ] 域名在前、IP 在后，IP 规则都带 `no-resolve`
 - [ ] 组名 `🌐 MEGA` 逐字一致，emoji 后有一个空格
-- [ ] IPv6 用了 `IP-CIDR6`
-- [ ] `mega.yaml` 与 `mega.js` 的域名、网段列表一致
+- [ ] `mega.yaml` 与 `mega.js` 的规则条目、provider 配置一致
 - [ ] 本地能加载：`python3 -c "import yaml;yaml.safe_load(open('mega.yaml'))"`、`node --check mega.js`
+- [ ] provider 的 mrs 地址能取到：`curl -sI <url>` 应为 200
+- [ ] 用真实订阅结构跑一遍 `main(config)`，确认旧版遗留的 `DOMAIN-SUFFIX,...,🌐 MEGA` 已被清掉
 
 ## 分组里的节点从哪来
 

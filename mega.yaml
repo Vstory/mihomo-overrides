@@ -4,6 +4,12 @@
 #   MEGA 会出现在列表最顶端；要排在「节点选择」「自动选择」之后请改用 mega.js（那边用 splice 算位置）。
 #   rules 是顺序匹配：必须前插，追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）。
 #
+#   规则来源（都不用手写维护）：
+#     域名 —— rule-provider 拉 MetaCubeX 的 mega.mrs（对应 v2fly domain-list-community 的 mega
+#             分类，7 条域名，含 transfer.it / megapay.nz 这类容易漏的）；不用 GEOSITE,mega
+#             是因为它依赖内置 geosite.dat 是否打包了该分类，rule-provider 不依赖本地数据版本。
+#     IP   —— IP-ASN 直接按 MEGA 自有 ASN 匹配，不用再手抄网段；依赖 ASN.mmdb（Mishka 内置）。
+#
 #   include-all 让组自动并入订阅里的全部节点（proxies 与 proxy-providers 都算），换订阅、
 #   加节点都不用改本文件。代价：机场塞的伪节点（"剩余流量：948 GB"这类）也会进组，且
 #   exclude-filter 只对 provider 节点生效、管不到 include-all 的项 —— 要剔掉伪节点请改用 mega.js。
@@ -18,26 +24,18 @@
       - 🚀节点选择
       - DIRECT
 
+rule-providers:
+  mega-site:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/mega.mrs
+    path: ./ruleset/mega.mrs
+    interval: 86400
+
 +rules:
-  - DOMAIN-SUFFIX,mega.nz,🌐 MEGA
-  - DOMAIN-SUFFIX,mega.io,🌐 MEGA
-  - DOMAIN-SUFFIX,mega.co.nz,🌐 MEGA
-  # 以下网段是 MEGA 自有 ASN 的已宣告前缀（AS203055 MEGA-LIMITED-AS + AS205809 MEGA Privacy Kft.），
-  # 域名被污染或 App 直连 IP 时兜底；no-resolve 避免为纯 IP 流量多打一次 DNS。
-  - IP-CIDR,31.216.144.0/22,🌐 MEGA,no-resolve
-  - IP-CIDR,31.216.148.0/24,🌐 MEGA,no-resolve
-  - IP-CIDR,66.203.124.0/22,🌐 MEGA,no-resolve
-  - IP-CIDR,82.21.172.0/24,🌐 MEGA,no-resolve
-  - IP-CIDR,82.29.203.0/24,🌐 MEGA,no-resolve
-  - IP-CIDR,82.29.204.0/22,🌐 MEGA,no-resolve
-  - IP-CIDR,89.44.168.0/23,🌐 MEGA,no-resolve
-  - IP-CIDR,94.24.36.0/23,🌐 MEGA,no-resolve
-  - IP-CIDR,162.208.16.0/24,🌐 MEGA,no-resolve
-  - IP-CIDR,185.206.24.0/22,🌐 MEGA,no-resolve
-  - IP-CIDR,217.180.20.0/23,🌐 MEGA,no-resolve
-  - IP-CIDR6,2001:67c:1998::/48,🌐 MEGA,no-resolve
-  - IP-CIDR6,2001:678:25c::/48,🌐 MEGA,no-resolve
-  - IP-CIDR6,2a09:a381::/39,🌐 MEGA,no-resolve
-  - IP-CIDR6,2a0b:e40::/31,🌐 MEGA,no-resolve
-  - IP-CIDR6,2a0b:e42::/31,🌐 MEGA,no-resolve
-  - IP-CIDR6,2a0b:e44::/31,🌐 MEGA,no-resolve
+  # rules 顺序匹配，必须前插：追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）
+  - RULE-SET,mega-site,🌐 MEGA
+  # AS203055 = MEGA-LIMITED-AS，AS205809 = MEGA Privacy Kft.
+  - IP-ASN,203055,🌐 MEGA,no-resolve
+  - IP-ASN,205809,🌐 MEGA,no-resolve

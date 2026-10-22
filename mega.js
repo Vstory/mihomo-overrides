@@ -57,29 +57,30 @@ function main(config) {
   rest.splice(insertAt, 0, group);
   config['proxy-groups'] = rest;
 
-  var domains = ['mega.nz', 'mega.io', 'mega.co.nz'];
-  var cidrs = [
-    '31.216.144.0/22', '31.216.148.0/24', '66.203.124.0/22',
-    '82.21.172.0/24', '82.29.203.0/24', '82.29.204.0/22',
-    '89.44.168.0/23', '94.24.36.0/23', '162.208.16.0/24',
-    '185.206.24.0/22', '217.180.20.0/23'
-  ];
-  var cidrs6 = [
-    '2001:67c:1998::/48', '2001:678:25c::/48', '2a09:a381::/39',
-    '2a0b:e40::/31', '2a0b:e42::/31', '2a0b:e44::/31'
+  // 规则来源见 mega.yaml 注释：域名走 rule-provider，IP 走 IP-ASN，都不需要手抄清单
+  var providers = config['rule-providers'] || {};
+  providers['mega-site'] = {
+    type: 'http',
+    behavior: 'domain',
+    format: 'mrs',
+    url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/mega.mrs',
+    path: './ruleset/mega.mrs',
+    interval: 86400
+  };
+  config['rule-providers'] = providers;
+
+  var mega = [
+    'RULE-SET,mega-site,' + GROUP,
+    'IP-ASN,203055,' + GROUP + ',no-resolve',
+    'IP-ASN,205809,' + GROUP + ',no-resolve'
   ];
 
-  var mega = [];
-  var j;
-  for (j = 0; j < domains.length; j++) mega.push('DOMAIN-SUFFIX,' + domains[j] + ',' + GROUP);
-  for (j = 0; j < cidrs.length; j++) mega.push('IP-CIDR,' + cidrs[j] + ',' + GROUP + ',no-resolve');
-  for (j = 0; j < cidrs6.length; j++) mega.push('IP-CIDR6,' + cidrs6[j] + ',' + GROUP + ',no-resolve');
-
-  // 先剔掉旧的同款规则再前插：重复选中同一覆写不会越叠越多
+  // 剔掉目标组是本组的旧规则：旧版写过 DOMAIN-SUFFIX/IP-CIDR，只比对全等会留下残骸
   var oldRules = config.rules || [];
   var kept = [];
   for (j = 0; j < oldRules.length; j++) {
-    if (mega.indexOf(oldRules[j]) < 0) kept.push(oldRules[j]);
+    var r = oldRules[j];
+    if (typeof r !== 'string' || r.indexOf(',' + GROUP) < 0) kept.push(r);
   }
   config.rules = mega.concat(kept);
   return config;
