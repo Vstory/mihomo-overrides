@@ -1,10 +1,9 @@
 // MEGA 覆写（JavaScript）。与 mega.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
-//   🌐 MEGA 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
+//   MEGA 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
 //   内核约定：main(config) 的入参出参都是整份配置对象（goja 执行、2 秒超时、输出上限 1 MB）。
 function main(config) {
-    // 组名不带 emoji：左侧图标已经是品牌 M，名字前再放 🌐 会重复
-  var GROUP = 'MEGA';
+  var GROUP = '🌐 MEGA';
   // 组图标走 Mishka 的 IconLoader：网络图片 + 磁盘缓存，PNG 最好（BitmapFactory 不解码 .ico）
   var ICON = 'https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/mega.png';
   // 机场惯用伪节点名，命中就不进组（想连这些信息节点也能选的话，删掉这一行）

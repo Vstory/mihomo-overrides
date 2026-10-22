@@ -159,7 +159,7 @@ Mishka 的 `IconDiskCache` 对每个 URL **没有 TTL、没有版本校验**：`
 - 域名规则排在 IP 规则**前面**：域名能判就直接判，不必等解析。
 - 所有 IP 规则带 `no-resolve`：不让内核为了匹配规则多发一次 DNS，纯 IP 流量不该触发解析。
 - IPv6 前缀写 `IP-CIDR6`，不要塞进 `IP-CIDR`。
-- 组名 `MEGA` 必须与 `proxy-groups+` 里逐字一致，含 emoji 与中间的空格。
+- 组名 `🌐 MEGA` 必须与 `+proxy-groups` 里逐字一致，含 emoji 与中间的空格。
 
 ### 当前基线（2026-10 从 RIPEstat 拉的公告前缀）
 
@@ -193,7 +193,7 @@ done
 
 - [ ] 规则段是 `+rules`，没写成 `rules`
 - [ ] 域名在前、IP 在后，IP 规则全部 `no-resolve`
-- [ ] 组名 `MEGA` 逐字一致，emoji 后有一个空格
+- [ ] 组名 `🌐 MEGA` 逐字一致，emoji 后有一个空格
 - [ ] IPv6 用了 `IP-CIDR6`
 - [ ] `mega.yaml` 与 `mega.js` 的域名、网段列表一致
 - [ ] 本地能加载：`python3 -c "import yaml;yaml.safe_load(open('mega.yaml'))"`、`node --check mega.js`
