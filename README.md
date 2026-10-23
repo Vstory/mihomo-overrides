@@ -19,6 +19,8 @@ https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/mega.yaml
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/mega.js
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/boosty.yaml
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/boosty.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/github.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/github.js
 ```
 
 保存后在「订阅」页把覆写勾选给目标订阅。多个覆写按勾选顺序依次套用，前一个的输出是后一个的输入。
@@ -31,8 +33,23 @@ https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/boosty.js
 | `mega.yaml` | MEGA 网盘 | 同上，但节点靠 `include-all` 全量并入（伪节点会一起进来） |
 | `boosty.js` | Boosty | `💰 Boosty` 分组（同上）+ `DOMAIN-SUFFIX,boosty.to` 一条规则 |
 | `boosty.yaml` | Boosty | 同上，节点靠 `include-all` |
+| `github.js` | GitHub | `🐙 GitHub` 分组（同上）+ 13 条 `DOMAIN-SUFFIX` 规则（前插） |
+| `github.yaml` | GitHub | 同上，节点靠 `include-all` |
 
 图标怎么设计、规则怎么维护、改动后自查什么，见 [AGENTS.md](AGENTS.md)。
+
+## GitHub 只收核心域名
+
+域名清单取自 v2fly geosite 的 `github` 分类，但**只取了核心子集**，有意排除这些：
+
+- `github.io` —— 全世界用户的 Pages 站点，访问任何人的博客都会命中，收进来等于把半个互联网塞进组
+- `ghcr.io` —— 容器镜像，大流量，多数场景该直连或走别的组
+- `npmjs`（geosite 里 `include:npmjs` 顺带带进来的）—— 包下载，同上
+- `githubstatus` / `cafe.` / `collector.` 等遥测域名 —— 不影响功能，收了只是徒增规则
+
+没有 IP 规则：GitHub 的 Release 与资源下载走 Amazon S3（`github-production-*.s3.amazonaws.com`）和
+Azure Blob（`productionresultssa*`），都不在 GitHub 自己的 AS36459 里，`IP-ASN` 兜不住；按 IP 收还会
+误伤同段其它租户。`api.github.com/meta` 公布的段是 web/API 出口，与下载链不同源，同样不能当兜底。
 
 ## Boosty 只有域名规则
 

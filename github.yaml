@@ -1,0 +1,51 @@
+# Version 1.0.0 · 2026-10-24 00:14 ── add GitHub: core domains only, no Pages/registry/npm
+# GitHub 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
+#   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
+#   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
+#   GitHub 会出现在列表最顶端；要排在「节点选择」「自动选择」之后请改用 github.js。
+#   rules 是顺序匹配：必须前插，追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）。
+#
+#   范围取舍（有意排除的项）：
+#     - github.io：全世界用户的 Pages 站点，访问任何人的博客都会命中，收进来等于把整个互联网往组里塞。
+#     - ghcr.io / npmjs：镜像与包下载，大流量且多数场景应直连或走别的组。
+#     - githubstatus / cafe / collector 等遥测域名：不影响功能，收进来只是徒增规则。
+#
+#   没有 IP 规则，原因：
+#     - GitHub 的 Release 与资源下载走 Amazon S3（github-production-*.s3.amazonaws.com）和
+#       Azure Blob（productionresultssa*），这些不在 GitHub 自己的 AS36459 里，IP-ASN 兜不住。
+#     - api.github.com/meta 公布的段是 web/API 出口，与下载链不同源，按 IP 收会挂一半漏一半。
+#       凑不出「域名 + 网段 + ASN」三层，就不要硬凑（同 boosty 的处理）。
+#
+#   include-all 让组自动并入订阅里的全部节点，换订阅、加节点都不用改本文件。代价：机场塞的伪节点
+#   （"剩余流量：948 GB"这类）也会进组，且 exclude-filter 管不到 include-all 的项 —— 要剔掉伪节点
+#   请改用 github.js。
+
++proxy-groups:
+  # select 而不是 url-test：只有 select 的成员能放 proxy-group，才能把「自动选择」「节点选择」
+  # 挑进本组。代价是选中的节点断了不会自己换 —— 到代理页手动切一个能连的节点。
+  # 这两个组名硬写在这里：订阅里没有该组的话内核会整份配置校验失败，github.js 会先检测再引用。
+  - name: 🐙 GitHub
+    type: select
+    icon: https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/github.png
+    include-all: true
+    proxies:
+      - ♻️自动选择
+      - 🚀节点选择
+      - DIRECT
+
++rules:
+  # rules 顺序匹配，必须前插：追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）
+  # DOMAIN-SUFFIX 自带子域（api./raw./camo./avatars. 这些），不用逐条写
+  - DOMAIN-SUFFIX,github.com,🐙 GitHub
+  - DOMAIN-SUFFIX,githubusercontent.com,🐙 GitHub
+  - DOMAIN-SUFFIX,githubassets.com,🐙 GitHub
+  - DOMAIN-SUFFIX,github.dev,🐙 GitHub
+  - DOMAIN-SUFFIX,github.blog,🐙 GitHub
+  - DOMAIN-SUFFIX,github.community,🐙 GitHub
+  - DOMAIN-SUFFIX,githubapp.com,🐙 GitHub
+  - DOMAIN-SUFFIX,githubpreview.dev,🐙 GitHub
+  - DOMAIN-SUFFIX,ghe.com,🐙 GitHub
+  - DOMAIN-SUFFIX,gh.io,🐙 GitHub
+  - DOMAIN-SUFFIX,git.io,🐙 GitHub
+  - DOMAIN-SUFFIX,dependabot.com,🐙 GitHub
+  - DOMAIN-SUFFIX,repo.new,🐙 GitHub
