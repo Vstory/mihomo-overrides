@@ -305,6 +305,7 @@ rule-providers:
   tolerance: 50
   lazy: true
   empty-fallback: DIRECT
+  hidden: true
 ```
 
 每个字段的理由，改之前先看这张表：
@@ -315,6 +316,7 @@ rule-providers:
 | `include-all: true` | 换订阅不用改文件，provider 的节点也会进来 |
 | `filter` | 真正筛节点的地方，按节点名匹配，规则见下节 |
 | `empty-fallback: DIRECT` | **必须显式写**。内核默认回退 `COMPATIBLE`，订阅里没这个组会直接报 `empty fallback proxy 'COMPATIBLE' not found`，整份配置校验失败 |
+| `hidden: true` | 地区组只作为主组里的条目存在，不在「代理组」页平铺。Mishka 的 `ProxyViewModel` 过滤 `hidden` 组（`filter { it.name != GLOBAL_GROUP && !it.hidden }`）；去掉这个字段，24 个组会全部堆在代理组列表里 |
 | `lazy: true` | 只在使用该组时测速，避免 24 组 × 上百节点开机全测 |
 | `tolerance: 50` | 延迟差 50ms 内不换节点，防抖 |
 | `url: gstatic/generate_204` | 空响应端点，秒回。**不要用目标站点首页**——mega.nz 要 4.5 秒才响应，加节点转发就超时，整组被判不可用 |

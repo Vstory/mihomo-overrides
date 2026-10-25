@@ -1,4 +1,4 @@
-// Version 0.0.1 · 2026-10-25 08:56 ── add per-country url-test groups (auto-pick the fastest node per country)
+// Version 0.1.1 · 2026-10-25 09:35 ── drop single-char aliases that matched other countries (SG hit Canada via 加)
 // MEGA 覆写（JavaScript）。与 mega.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
 //   MEGA 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
@@ -25,18 +25,18 @@ function main(config) {
     ['德国', '德国|德國|🇩🇪|\\bde\\b|germany|德'],
     ['荷兰', '荷兰|荷蘭|🇳🇱|\\bnl\\b|netherlands|荷'],
     ['俄罗斯', '俄罗斯|俄羅斯|🇷🇺|\\bru\\b|russia|俄'],
-    ['加拿大', '加拿大|🇨🇦|\\bca\\b|canada|加'],
+    ['加拿大', '加拿大|🇨🇦|\\bca\\b|canada'],
     ['澳大利亚', '澳大利亚|澳洲|🇦🇺|\\bau\\b|australia|澳'],
     ['法国', '法国|法國|🇫🇷|\\bfr\\b|france|法'],
-    ['马来西亚', '马来西亚|馬來西亞|🇲🇾|\\bmy\\b|malaysia|马|馬'],
+    ['马来西亚', '马来西亚|馬來西亞|🇲🇾|\\bmy\\b|malaysia'],
     ['泰国', '泰国|泰國|🇹🇭|\\bth\\b|thailand|泰'],
     ['越南', '越南|🇻🇳|\\bvn\\b|vietnam|越'],
     ['印度', '印度(?!尼西亚)|🇮🇳|\\bin\\b|india'],
     ['印度尼西亚', '印度尼西亚|印尼|🇮🇩|\\bid\\b|indonesia'],
     ['菲律宾', '菲律宾|菲律賓|🇵🇭|\\bph\\b|philippines'],
     ['土耳其', '土耳其|🇹🇷|\\btr\\b|turkey|türkiye|土'],
-    ['巴西', '巴西|🇧🇷|\\bbr\\b|brazil|巴'],
-    ['阿联酋', '阿联酋|阿拉伯|🇦🇪|\\bae\\b|emirates|dubai|阿'],
+    ['巴西', '巴西|🇧🇷|\\bbr\\b|brazil'],
+    ['阿联酋', '阿联酋|🇦🇪|\\bae\\b|emirates|dubai'],
     ['意大利', '意大利|義大利|🇮🇹|\\bit\\b|italy'],
     ['西班牙', '西班牙|🇪🇸|\\bes\\b|spain'],
   ];
@@ -112,7 +112,10 @@ function main(config) {
       interval: 300,
       tolerance: 50,
       lazy: true,
-      'empty-fallback': 'DIRECT'
+      'empty-fallback': 'DIRECT',
+      // 子组只在主组里做条目：Mishka 的 ProxyViewModel 会过滤 hidden 组，
+      // 否则 24 个地区组会在代理组页平铺
+      hidden: true
     });
     regionNames.push(regionName);
   }

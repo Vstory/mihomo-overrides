@@ -1,4 +1,4 @@
-# Version 0.0.1 · 2026-10-25 08:56 ── add per-country url-test groups (auto-pick the fastest node per country)
+# Version 0.1.1 · 2026-10-25 09:35 ── drop single-char aliases that matched other countries (SG hit Canada via 加)
 # MEGA 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
 #   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
@@ -67,6 +67,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 台湾
     type: url-test
     include-all: true
@@ -76,6 +77,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 日本
     type: url-test
     include-all: true
@@ -85,6 +87,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 韩国
     type: url-test
     include-all: true
@@ -94,6 +97,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 新加坡
     type: url-test
     include-all: true
@@ -103,6 +107,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 美国
     type: url-test
     include-all: true
@@ -112,6 +117,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 英国
     type: url-test
     include-all: true
@@ -121,6 +127,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 德国
     type: url-test
     include-all: true
@@ -130,6 +137,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 荷兰
     type: url-test
     include-all: true
@@ -139,6 +147,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 俄罗斯
     type: url-test
     include-all: true
@@ -148,15 +157,17 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 加拿大
     type: url-test
     include-all: true
-    filter: '(?i)加拿大|🇨🇦|\bca\b|canada|加'
+    filter: '(?i)加拿大|🇨🇦|\bca\b|canada'
     url: https://www.gstatic.com/generate_204
     interval: 300
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 澳大利亚
     type: url-test
     include-all: true
@@ -166,6 +177,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 法国
     type: url-test
     include-all: true
@@ -175,15 +187,17 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 马来西亚
     type: url-test
     include-all: true
-    filter: '(?i)马来西亚|馬來西亞|🇲🇾|\bmy\b|malaysia|马|馬'
+    filter: '(?i)马来西亚|馬來西亞|🇲🇾|\bmy\b|malaysia'
     url: https://www.gstatic.com/generate_204
     interval: 300
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 泰国
     type: url-test
     include-all: true
@@ -193,6 +207,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 越南
     type: url-test
     include-all: true
@@ -202,6 +217,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 印度
     type: url-test
     include-all: true
@@ -211,6 +227,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 印度尼西亚
     type: url-test
     include-all: true
@@ -220,6 +237,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 菲律宾
     type: url-test
     include-all: true
@@ -229,6 +247,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 土耳其
     type: url-test
     include-all: true
@@ -238,24 +257,27 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 巴西
     type: url-test
     include-all: true
-    filter: '(?i)巴西|🇧🇷|\bbr\b|brazil|巴'
+    filter: '(?i)巴西|🇧🇷|\bbr\b|brazil'
     url: https://www.gstatic.com/generate_204
     interval: 300
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 阿联酋
     type: url-test
     include-all: true
-    filter: '(?i)阿联酋|阿拉伯|🇦🇪|\bae\b|emirates|dubai|阿'
+    filter: '(?i)阿联酋|🇦🇪|\bae\b|emirates|dubai'
     url: https://www.gstatic.com/generate_204
     interval: 300
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 意大利
     type: url-test
     include-all: true
@@ -265,6 +287,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
   - name: 🌐 西班牙
     type: url-test
     include-all: true
@@ -274,6 +297,7 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
+    hidden: true
 +rules:
   # rules 顺序匹配，必须前插：追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）
   - GEOSITE,mega,🌐 MEGA
