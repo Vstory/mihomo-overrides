@@ -38,6 +38,20 @@ https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/github.js
 
 图标怎么设计、规则怎么维护、改动后自查什么，见 [AGENTS.md](AGENTS.md)。
 
+## 校验
+
+改完覆写一律跑脚本，不要手搓命令：
+
+```bash
+python3 scripts/check_overrides.py          # 全部应用
+python3 scripts/check_overrides.py mega     # 只查一个
+python3 scripts/check_overrides.py -q       # 只列失败项
+```
+
+查两版版本号一致性、主组与 24 个国家/地区组的字段、正则词边界与「节点名 × 地区」矩阵，
+并用假订阅实跑 JS（首选项顺序 / 地区组 / 伪节点剔除）。需要 `node` 才跑 JS 部分，没有会自动跳过。
+退出码 `1` 表示有失败。
+
 ## GitHub 只收核心域名
 
 域名清单取自 v2fly geosite 的 `github` 分类，但**只取了核心子集**，有意排除这些：
