@@ -1,4 +1,4 @@
-# Version 0.1.2 · 2026-10-25 09:55 ── JS per-country groups use flag names and skip duplicates across overrides
+# Version 0.1.3 · 2026-10-25 10:12 ── show per-country groups below subscription groups instead of hiding them
 # Boosty 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
 #   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
@@ -16,11 +16,11 @@
 #   伪节点（"剩余流量：948 GB"这类）也会进组，且 exclude-filter 管不到 include-all 的项
 #   —— 要剔掉伪节点请改用 boosty.js。
 
-+proxy-groups:
   # 主组用 select：只有 select 的成员能放 proxy-group，「自动选择」「节点选择」和下面的
   #   国家/地区组才进得来。proxies 顺序 = 自动选择 → 节点选择 → DIRECT → 国家/地区，
   #   平铺节点由 include-all 追加在最后（内核行为，写不到前面）。
   # 组名硬写在这里：订阅里没有该组的话内核会整份配置校验失败，boosty.js 会先检测再引用。
++proxy-groups:
   - name: 💰 Boosty
     type: select
     icon: https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/boosty.png
@@ -59,6 +59,7 @@
   #   · 两字母代码包 \b 词边界，否则 US 会吃 Russia、IN 会吃 Singapore
   #   · empty-fallback 必须显式写 DIRECT：内核默认回退 COMPATIBLE，订阅没这个组会校验失败
   #   · lazy 只在使用时测速省电；tolerance 防抖（延迟差 50ms 内不换节点）
+proxy-groups+:
   - name: 💰 香港
     type: url-test
     include-all: true
@@ -68,7 +69,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 台湾
     type: url-test
     include-all: true
@@ -78,7 +78,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 日本
     type: url-test
     include-all: true
@@ -88,7 +87,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 韩国
     type: url-test
     include-all: true
@@ -98,7 +96,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 新加坡
     type: url-test
     include-all: true
@@ -108,7 +105,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 美国
     type: url-test
     include-all: true
@@ -118,7 +114,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 英国
     type: url-test
     include-all: true
@@ -128,7 +123,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 德国
     type: url-test
     include-all: true
@@ -138,7 +132,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 荷兰
     type: url-test
     include-all: true
@@ -148,7 +141,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 俄罗斯
     type: url-test
     include-all: true
@@ -158,7 +150,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 加拿大
     type: url-test
     include-all: true
@@ -168,7 +159,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 澳大利亚
     type: url-test
     include-all: true
@@ -178,7 +168,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 法国
     type: url-test
     include-all: true
@@ -188,7 +177,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 马来西亚
     type: url-test
     include-all: true
@@ -198,7 +186,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 泰国
     type: url-test
     include-all: true
@@ -208,7 +195,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 越南
     type: url-test
     include-all: true
@@ -218,7 +204,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 印度
     type: url-test
     include-all: true
@@ -228,7 +213,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 印度尼西亚
     type: url-test
     include-all: true
@@ -238,7 +222,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 菲律宾
     type: url-test
     include-all: true
@@ -248,7 +231,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 土耳其
     type: url-test
     include-all: true
@@ -258,7 +240,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 巴西
     type: url-test
     include-all: true
@@ -268,7 +249,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 阿联酋
     type: url-test
     include-all: true
@@ -278,7 +258,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 意大利
     type: url-test
     include-all: true
@@ -288,7 +267,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
   - name: 💰 西班牙
     type: url-test
     include-all: true
@@ -298,7 +276,6 @@
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-    hidden: true
 +rules:
   # rules 顺序匹配，必须前插：追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）
   # DOMAIN-SUFFIX 自带子域（media./api./static. 这些），不用逐条写

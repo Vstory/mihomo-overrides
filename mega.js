@@ -1,4 +1,4 @@
-// Version 0.1.2 · 2026-10-25 09:55 ── JS per-country groups use flag names and skip duplicates across overrides
+// Version 0.1.3 · 2026-10-25 10:12 ── show per-country groups below subscription groups instead of hiding them
 // MEGA 覆写（JavaScript）。与 mega.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
 //   MEGA 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
@@ -120,10 +120,7 @@ function main(config) {
       interval: 300,
       tolerance: 50,
       lazy: true,
-      'empty-fallback': 'DIRECT',
-      // 子组只在主组里做条目：Mishka 的 ProxyViewModel 会过滤 hidden 组，
-      // 否则 24 个地区组会在代理组页平铺
-      hidden: true
+      'empty-fallback': 'DIRECT'
     });
   }
 
@@ -153,7 +150,7 @@ function main(config) {
   }
   rest.splice(insertAt, 0, group);
   if (regionGroups.length > 0) {
-    rest.splice.apply(rest, [insertAt + 1, 0].concat(regionGroups));
+    rest.push.apply(rest, regionGroups);
   }
   config['proxy-groups'] = rest;
 

@@ -46,7 +46,6 @@ REGION_KEYS = {
     'tolerance': 50,
     'lazy': True,
     'empty-fallback': 'DIRECT',
-    'hidden': True,
 }
 
 VERSION_RE = re.compile(r'^(?:#|//)\s+Version (\d+\.\d+\.\d+) · (\d{4}-\d{2}-\d{2} \d{2}:\d{2}) ── (.+)$')
@@ -131,7 +130,7 @@ def read_version_head(path: Path) -> tuple[str, str] | None:
 
 def load_yaml_groups(path: Path) -> list[dict]:
     data = yaml.safe_load(path.read_text(encoding='utf-8'))
-    return data.get('+proxy-groups') or []
+    return (data.get('+proxy-groups') or []) + (data.get('proxy-groups+') or [])
 
 
 def region_filter(nodes: list[dict], name: str) -> str | None:

@@ -292,6 +292,8 @@ rule-providers:
 
 同时启用多个覆写时优先用 JS 版：成员显示国旗，且不依赖前缀区分。
 
+**地区组在代理组页的位置**：主组走 `+proxy-groups`（前插，排在订阅组之前），地区组走 `proxy-groups+`（追加到数组末尾，显示在 GLOBAL 之前）；JS 版对应 `rest.splice(insertAt, 0, group)` + `rest.push(...regionGroups)`。不要把两者都前插——地区组会顶到列表最上面，把订阅自带的组挤下去。
+
 ### 主组与地区组的排版
 
 主组 `proxies` 顺序固定为：
@@ -316,7 +318,6 @@ YAML 版（组名带应用前缀）：
   tolerance: 50
   lazy: true
   empty-fallback: DIRECT
-  hidden: true
 ```
 
 JS 版（组名用国旗，且定义前先查重）：
@@ -336,7 +337,6 @@ for (r = 0; r < curGroups.length; r++) existing[curGroups[r].name] = true;
 | `include-all: true` | 换订阅不用改文件，provider 的节点也会进来 |
 | `filter` | 真正筛节点的地方，按节点名匹配，规则见下节 |
 | `empty-fallback: DIRECT` | **必须显式写**。内核默认回退 `COMPATIBLE`，订阅里没这个组会直接报 `empty fallback proxy 'COMPATIBLE' not found`，整份配置校验失败 |
-| `hidden: true` | 地区组只作为主组里的条目存在，不在「代理组」页平铺。Mishka 的 `ProxyViewModel` 过滤 `hidden` 组（`filter { it.name != GLOBAL_GROUP && !it.hidden }`）；去掉这个字段，24 个组会全部堆在代理组列表里 |
 | `lazy: true` | 只在使用该组时测速，避免 24 组 × 上百节点开机全测 |
 | `tolerance: 50` | 延迟差 50ms 内不换节点，防抖 |
 | `url: gstatic/generate_204` | 空响应端点，秒回。**不要用目标站点首页**——mega.nz 要 4.5 秒才响应，加节点转发就超时，整组被判不可用 |
