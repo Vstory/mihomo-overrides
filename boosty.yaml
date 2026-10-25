@@ -1,4 +1,4 @@
-# Version 0.1.1 · 2026-10-25 09:35 ── drop single-char aliases that matched other countries (SG hit Canada via 加)
+# Version 0.1.2 · 2026-10-25 09:55 ── JS per-country groups use flag names and skip duplicates across overrides
 # Boosty 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
 #   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，

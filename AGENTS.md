@@ -281,7 +281,16 @@ rule-providers:
 
 ## 国家/地区聚合组
 
-每个覆写除主组外，固定带 **24 个按国家/地区的 `url-test` 组**（如 `🌐 香港`），组内自动挑该地区延迟最低的节点。三个覆写各一套，组名带主组 emoji 前缀（`🌐` / `🐙` / `💰`），同时启用不会撞名。
+每个覆写除主组外，固定带 **24 个按国家/地区的 `url-test` 组**（如 `🌐 香港`），组内自动挑该地区延迟最低的节点。
+
+**两版的组名不同，这是刻意的**：
+
+| 版本 | 地区组名 | 为什么 |
+|---|---|---|
+| JS（`main(config)`） | `🇯🇵 日本`（国旗） | JS 能读到前面覆写留下的 `proxy-groups`，地区组「已有就复用、没有才定义」，所以组名可以是纯国旗，任意组合/顺序启用都不重名 |
+| YAML（`+proxy-groups`） | `🌐 日本`（应用前缀） | YAML 是静态合并：只能前插/追加/替换数组，没有条件判断。纯国旗名会让三个覆写合并出三个同名组，内核直接报 `duplicate name`。前缀保证同时启用也不撞 |
+
+同时启用多个覆写时优先用 JS 版：成员显示国旗，且不依赖前缀区分。
 
 ### 主组与地区组的排版
 
@@ -295,6 +304,8 @@ rule-providers:
 
 ### 地区组的标准写法
 
+YAML 版（组名带应用前缀）：
+
 ```yaml
 - name: 🌐 香港
   type: url-test
@@ -306,6 +317,15 @@ rule-providers:
   lazy: true
   empty-fallback: DIRECT
   hidden: true
+```
+
+JS 版（组名用国旗，且定义前先查重）：
+
+```js
+var existing = {};
+var curGroups = config['proxy-groups'] || [];
+for (r = 0; r < curGroups.length; r++) existing[curGroups[r].name] = true;
+// 循环里：if (existing[regionName]) continue;   // 前面的覆写已定义 → 只引用不重复定义
 ```
 
 每个字段的理由，改之前先看这张表：

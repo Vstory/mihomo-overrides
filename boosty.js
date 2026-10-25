@@ -1,4 +1,4 @@
-// Version 0.1.1 · 2026-10-25 09:35 ── drop single-char aliases that matched other countries (SG hit Canada via 加)
+// Version 0.1.2 · 2026-10-25 09:55 ── JS per-country groups use flag names and skip duplicates across overrides
 // Boosty 覆写（JavaScript）。与 boosty.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
 //   Boosty 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
@@ -23,30 +23,30 @@ function main(config) {
   //   · 两字母代码必须包 \b 词边界：否则 US 会命中 Russia、IN 会命中 Singapore 这种子串误伤
   //   · 中文单字只保留不会串门的（港/美/日…），"新""印"这类太宽的一律不进正则
   var REGIONS = [
-    ['香港', '香港|🇭🇰|\\bhk\\b|hong ?kong|港'],
-    ['台湾', '台湾|台灣|🇹🇼|\\btw\\b|taiwan|台'],
-    ['日本', '日本|🇯🇵|\\bjp\\b|japan|日'],
-    ['韩国', '韩国|韓國|🇰🇷|\\bkr\\b|korea|韩|韓'],
-    ['新加坡', '新加坡|狮城|獅城|🇸🇬|\\bsg\\b|singapore'],
-    ['美国', '美国|美國|🇺🇸|\\bus\\b|\\busa\\b|united ?states|美'],
-    ['英国', '英国|英國|🇬🇧|\\buk\\b|\\bgb\\b|united ?kingdom|英'],
-    ['德国', '德国|德國|🇩🇪|\\bde\\b|germany|德'],
-    ['荷兰', '荷兰|荷蘭|🇳🇱|\\bnl\\b|netherlands|荷'],
-    ['俄罗斯', '俄罗斯|俄羅斯|🇷🇺|\\bru\\b|russia|俄'],
-    ['加拿大', '加拿大|🇨🇦|\\bca\\b|canada'],
-    ['澳大利亚', '澳大利亚|澳洲|🇦🇺|\\bau\\b|australia|澳'],
-    ['法国', '法国|法國|🇫🇷|\\bfr\\b|france|法'],
-    ['马来西亚', '马来西亚|馬來西亞|🇲🇾|\\bmy\\b|malaysia'],
-    ['泰国', '泰国|泰國|🇹🇭|\\bth\\b|thailand|泰'],
-    ['越南', '越南|🇻🇳|\\bvn\\b|vietnam|越'],
-    ['印度', '印度(?!尼西亚)|🇮🇳|\\bin\\b|india'],
-    ['印度尼西亚', '印度尼西亚|印尼|🇮🇩|\\bid\\b|indonesia'],
-    ['菲律宾', '菲律宾|菲律賓|🇵🇭|\\bph\\b|philippines'],
-    ['土耳其', '土耳其|🇹🇷|\\btr\\b|turkey|türkiye|土'],
-    ['巴西', '巴西|🇧🇷|\\bbr\\b|brazil'],
-    ['阿联酋', '阿联酋|🇦🇪|\\bae\\b|emirates|dubai'],
-    ['意大利', '意大利|義大利|🇮🇹|\\bit\\b|italy'],
-    ['西班牙', '西班牙|🇪🇸|\\bes\\b|spain'],
+    ['香港', '🇭🇰', '香港|🇭🇰|\\bhk\\b|hong ?kong|港'],
+    ['台湾', '🇹🇼', '台湾|台灣|🇹🇼|\\btw\\b|taiwan|台'],
+    ['日本', '🇯🇵', '日本|🇯🇵|\\bjp\\b|japan|日'],
+    ['韩国', '🇰🇷', '韩国|韓國|🇰🇷|\\bkr\\b|korea|韩|韓'],
+    ['新加坡', '🇸🇬', '新加坡|狮城|獅城|🇸🇬|\\bsg\\b|singapore'],
+    ['美国', '🇺🇸', '美国|美國|🇺🇸|\\bus\\b|\\busa\\b|united ?states|美'],
+    ['英国', '🇬🇧', '英国|英國|🇬🇧|\\buk\\b|\\bgb\\b|united ?kingdom|英'],
+    ['德国', '🇩🇪', '德国|德國|🇩🇪|\\bde\\b|germany|德'],
+    ['荷兰', '🇳🇱', '荷兰|荷蘭|🇳🇱|\\bnl\\b|netherlands|荷'],
+    ['俄罗斯', '🇷🇺', '俄罗斯|俄羅斯|🇷🇺|\\bru\\b|russia|俄'],
+    ['加拿大', '🇨🇦', '加拿大|🇨🇦|\\bca\\b|canada'],
+    ['澳大利亚', '🇦🇺', '澳大利亚|澳洲|🇦🇺|\\bau\\b|australia|澳'],
+    ['法国', '🇫🇷', '法国|法國|🇫🇷|\\bfr\\b|france|法'],
+    ['马来西亚', '🇲🇾', '马来西亚|馬來西亞|🇲🇾|\\bmy\\b|malaysia'],
+    ['泰国', '🇹🇭', '泰国|泰國|🇹🇭|\\bth\\b|thailand|泰'],
+    ['越南', '🇻🇳', '越南|🇻🇳|\\bvn\\b|vietnam|越'],
+    ['印度', '🇮🇳', '印度(?!尼西亚)|🇮🇳|\\bin\\b|india'],
+    ['印度尼西亚', '🇮🇩', '印度尼西亚|印尼|🇮🇩|\\bid\\b|indonesia'],
+    ['菲律宾', '🇵🇭', '菲律宾|菲律賓|🇵🇭|\\bph\\b|philippines'],
+    ['土耳其', '🇹🇷', '土耳其|🇹🇷|\\btr\\b|turkey|türkiye|土'],
+    ['巴西', '🇧🇷', '巴西|🇧🇷|\\bbr\\b|brazil'],
+    ['阿联酋', '🇦🇪', '阿联酋|🇦🇪|\\bae\\b|emirates|dubai'],
+    ['意大利', '🇮🇹', '意大利|義大利|🇮🇹|\\bit\\b|italy'],
+    ['西班牙', '🇪🇸', '西班牙|🇪🇸|\\bes\\b|spain'],
   ];
 
   var groups = config['proxy-groups'] || [];
@@ -97,7 +97,7 @@ function main(config) {
   var hit = {};
   var r;
   for (r = 0; r < REGIONS.length; r++) {
-    var regionReg = new RegExp(REGIONS[r][1], 'i');
+    var regionReg = new RegExp(REGIONS[r][2], 'i');
     for (i = 0; i < nodeNames.length; i++) {
       if (regionReg.test(nodeNames[i])) {
         hit[REGIONS[r][0]] = true;
@@ -106,16 +106,24 @@ function main(config) {
     }
   }
 
+  // 前面的覆写可能已经定义过同名地区组（三个覆写可任意组合启用），
+  // 组名全局唯一，重复定义会让内核报 duplicate name，所以只补缺不覆盖
+  var existing = {};
+  var curGroups = config['proxy-groups'] || [];
+  for (r = 0; r < curGroups.length; r++) existing[curGroups[r].name] = true;
+
   var regionGroups = [];
   var regionNames = [];
   for (r = 0; r < REGIONS.length; r++) {
     if (inlineScan && !hit[REGIONS[r][0]]) continue;
-    var regionName = prefix + ' ' + REGIONS[r][0];
+    var regionName = REGIONS[r][1] + ' ' + REGIONS[r][0];
+    regionNames.push(regionName);
+    if (existing[regionName]) continue;
     regionGroups.push({
       name: regionName,
       type: 'url-test',
       'include-all': true,
-      filter: '(?i)' + REGIONS[r][1],
+      filter: '(?i)' + REGIONS[r][2],
       url: 'https://www.gstatic.com/generate_204',
       interval: 300,
       tolerance: 50,
@@ -125,7 +133,6 @@ function main(config) {
       // 否则 24 个地区组会在代理组页平铺
       hidden: true
     });
-    regionNames.push(regionName);
   }
 
   // 排版：自动选择 → 节点选择 → DIRECT → 国家/地区 → 订阅自带推荐节点组 → 平铺节点

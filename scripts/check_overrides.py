@@ -31,6 +31,13 @@ REGION_NAMES = [
 
 HEAD_ORDER = ['♻️自动选择', '🚀节点选择', 'DIRECT']
 
+FLAGS = {
+    '香港': '🇭🇰', '台湾': '🇹🇼', '日本': '🇯🇵', '韩国': '🇰🇷', '新加坡': '🇸🇬', '美国': '🇺🇸',
+    '英国': '🇬🇧', '德国': '🇩🇪', '荷兰': '🇳🇱', '俄罗斯': '🇷🇺', '加拿大': '🇨🇦', '澳大利亚': '🇦🇺',
+    '法国': '🇫🇷', '马来西亚': '🇲🇾', '泰国': '🇹🇭', '越南': '🇻🇳', '印度': '🇮🇳', '印度尼西亚': '🇮🇩',
+    '菲律宾': '🇵🇭', '土耳其': '🇹🇷', '巴西': '🇧🇷', '阿联酋': '🇦🇪', '意大利': '🇮🇹', '西班牙': '🇪🇸',
+}
+
 REGION_KEYS = {
     'type': 'url-test',
     'include-all': True,
@@ -293,19 +300,23 @@ def check_js_run(app: str, groups: list[dict], defined: dict[str, dict], rep: Re
     if proxies[:3] != HEAD_ORDER:
         rep.fail(f'{app}.js 主组首选项应为 {HEAD_ORDER}，实为 {proxies[:3]}')
 
-    expect_regions = set(defined)
-    got_groups = {g['name']: g for g in result_groups if g.get('name') in expect_regions}
-    if set(got_groups) != expect_regions:
-        rep.fail(f'{app}.js 应生成 {len(expect_regions)} 个地区组，实为 {len(got_groups)}')
+    expect = {f'{FLAGS[r]} {r}': r for r in REGION_NAMES}
+    got_groups = {g['name']: g for g in result_groups if g.get('name') in expect}
+    if set(got_groups) != set(expect):
+        missing = sorted(set(expect) - set(got_groups))
+        rep.fail(f'{app}.js 应生成 {len(expect)} 个国旗地区组，实为 {len(got_groups)}，缺 {missing[:4]}')
     got_regions = set(got_groups)
 
-    # JS 与 YAML 的 filter 必须逐字一致；退格符说明 \b 少写了一个反斜杠
-    for n, g in got_groups.items():
-        jf, yf = g.get('filter'), defined[n].get('filter')
+    # 组名用国旗、不带应用前缀；多覆写同时启用时靠 JS 侧的 exists 去重避免重名
+    for name, region in expect.items():
+        if name not in got_groups:
+            continue
+        jf = got_groups[name].get('filter')
+        yf = defined.get(f'{prefix} {region}', {}).get('filter')
         if isinstance(jf, str) and '\x08' in jf:
-            rep.fail(f'{app}.js {n}: filter 含退格符（\\b 少写一个反斜杠）')
-        elif jf != yf:
-            rep.fail(f'{app}.js {n}: filter 与 YAML 不一致')
+            rep.fail(f'{app}.js {name}: filter 含退格符（\\b 少写一个反斜杠）')
+        elif yf and jf != yf:
+            rep.fail(f'{app}.js {name}: filter 与 YAML 不一致')
 
     leaked = [n for n in FAKE_NODES if n in proxies]
     if leaked:
