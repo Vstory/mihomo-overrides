@@ -14,8 +14,8 @@ https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/boosty/
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/boosty/boosty.yaml
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/github/github.js
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/github/github.yaml
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/pornhub/pornhub.js
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/pornhub/pornhub.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Pornhub/Pornhub.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Pornhub/Pornhub.yaml
 ```
 
 - `all.js` 是 MEGA + Boosty + GitHub + Pornhub 的合集，勾一个就全生效；其余八个按应用单独用
