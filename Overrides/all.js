@@ -1,5 +1,10 @@
-// Version 0.0.2 · 2026-10-29 00:23 ── use PascalCase icon filenames
-// 合集覆写（JavaScript）：把 Overrides/ 下三个应用合成一份，省得逐个勾选。
+// Title: MEGA / Boosty / GitHub 合集覆写（JavaScript）
+// Description: 三个应用合成一份，24 个国家/地区组只定义一次、三个主组共用；与单应用覆写二选一
+// Version: 0.0.3
+// Last modified: 2026-10-29 00:37
+// Changelog: split header into one field per line
+//
+// 把 Overrides/ 下三个应用合成一份，省得逐个勾选。
 //   24 个国家/地区组只定义一次，三个主组共用；**与单应用覆写二选一**——双方的清理逻辑都会
 //   删掉同名主组，同时勾选会互相拆台。
 //   内核约定：main(config) 的入参出参都是整份配置对象（goja 执行、2 秒超时、输出上限 1 MB）。

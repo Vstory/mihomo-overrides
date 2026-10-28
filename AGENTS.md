@@ -8,13 +8,20 @@
 - **一应用两形态**：`Overrides/<app>/<app>.yaml`（键位覆写）与 `Overrides/<app>/<app>.js`（`main(config)`），规则内容必须一致，改一个就得同步另一个。**分组位置是唯一的例外**：键位只有前插/追加，做不到插到指定位置，YAML 版固定前插，需要精确落位只能靠 JS 的 `splice`。
 - **合集 `Overrides/all.js` 只有 JS 形态**：YAML 键位没有条件判断，凑不出「24 个地区组只定义一次、三个主组共用」的结构。它与单应用覆写**二选一**，同时勾选会互相删同名主组。
 - **图标与图标地址**只用 GitHub 官方 raw：`https://raw.githubusercontent.com/<owner>/<repo>/main/Icons/png/<Name>.png`，不加查询参数。
-- **版本头**：每个 `Overrides/<app>/<app>.yaml` / `<app>.js` 的**第 1 行**放版本行（英文），两版必须同步：
+- **头部**：照 AdGuard 过滤列表的写法，文件开头连续五行 `Key: value`，一行一个字段，顺序固定：
 
   ```
-  # Version 0.0.1 · 2026-10-25 08:56 ── add per-country url-test groups
+  # Title: MEGA 覆写（YAML）
+  # Description: 订阅全部节点经 include-all 并入 🌐 MEGA 组（伪节点会一起进来），规则条目同 mega.js
+  # Version: 0.1.6
+  # Last modified: 2026-10-29 00:37
+  # Changelog: split header into one field per line
+  #
   ```
 
-  YAML 用 `#`，JS 用 `//`。日期时间用本地时间（Asia/Shanghai）。摘要一句话说清这版改了什么。
+  YAML 用 `#`，JS 用 `//`；五行后以一行裸注释收尾，再接各文件的详细说明。两版的 `Version` 必须一致，
+  `Last modified` 用本地时间（Asia/Shanghai，`YYYY-MM-DD HH:MM`），`Changelog` 是英文一句话。
+  **不要把三项挤成一行**：`Scripts/check_overrides.py` 按 `HEADER_FIELDS` 校验字段齐全与先后顺序。
 
   **版本号从 `0.0.1` 起算**：六个文件在 2026-10-25 统一重置到 0.0.1，不再沿用之前的 1.x / 2.x 编号。此后按知识库
   `100_System/workflows/子流程/通用规范流程/工程域/脚本编写规则流程.md` 的语义化规则递增（0.x 阶段用次版本号表达结构性改动）：
@@ -38,7 +45,7 @@
 4. **写 `<app>.yaml`**：`+proxy-groups` 建组（带 `icon`），`+rules` 前插规则。
 5. **写 `<app>.js`**：规则与 YAML 等价；组位置用 `splice` 算，可精确落到某个组之后。
 6. **校验**：`python3 -c "import yaml;yaml.safe_load(open('Overrides/<app>/<app>.yaml'))"`、`node --check Overrides/<app>/<app>.js`，再用真实订阅结构跑一遍 `main(config)` 看组顺序和规则目标。
-7. **版本头**：两个文件的第 1 行写 `Version X.Y.Z · YYYY-MM-DD HH:MM ── English summary`，见「仓库约束」。
+7. **头部**：两个文件开头写五行 `Title / Description / Version / Last modified / Changelog`，一行一个，见「仓库约束」。
 8. **交付提醒**：图标地址不变时，使用者必须「清应用缓存 → 强制停止 → 重开」才能看到新图，原因见「改图标之后」。
 9. **组名**：跟订阅同样的命名风格（带 emoji 前缀），`name` 不要为了图标去改，见「组名保持原样」。
 
@@ -288,7 +295,7 @@ rule-providers:
 - [ ] 首选项里的聚合组（自动选择 / 节点选择 / 各运营商推荐节点）都真的在订阅里
 - [ ] `Overrides/mega/mega.yaml` 与 `mega.js` 的规则条目、provider 配置一致
 - [ ] 本地能加载：`python3 -c "import yaml;yaml.safe_load(open('Overrides/mega/mega.yaml'))"`、`node --check Overrides/mega/mega.js`
-- [ ] 跑一遍 `python3 Scripts/check_overrides.py mega`（版本头 / 结构 / 正则矩阵 / JS 实跑一次过）
+- [ ] 跑一遍 `python3 Scripts/check_overrides.py mega`（头部 / 结构 / 正则矩阵 / JS 实跑一次过）
 - [ ] provider 的 mrs 地址能取到：`curl -sI <url>` 应为 200
 - [ ] 用真实订阅结构跑一遍 `main(config)`，确认旧版遗留的 `DOMAIN-SUFFIX,...,🌐 MEGA` 已被清掉
 
@@ -425,7 +432,7 @@ python3 Scripts/check_overrides.py -q       # 只打印失败项
 | 检查 | 具体 |
 |---|---|
 | 目录结构 | `Overrides/<app>/<app>.{yaml,js}` 成对存在，目录名与文件名一致 |
-| 版本头 | 格式 `Version X.Y.Z · YYYY-MM-DD HH:MM ── 摘要`，两版版本号一致 |
+| 头部 | 五个字段各占一行、顺序为 Title / Description / Version / Last modified / Changelog，两版版本号一致 |
 | YAML | 可解析、`+proxy-groups` 存在 |
 | 主组结构 | `select`、`include-all`、icon 是无参数 GitHub raw、proxies 前 3 项是 `♻️自动选择 / 🚀节点选择 / DIRECT`、24 个地区组都列在首选项之后 |
 | 地区组字段 | `url-test` / `include-all` / `generate_204` / `interval 300` / `tolerance 50` / `lazy` / `empty-fallback: DIRECT` / filter 带 `(?i)` |

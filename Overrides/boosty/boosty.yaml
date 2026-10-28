@@ -1,5 +1,10 @@
-# Version 0.1.5 · 2026-10-29 00:23 ── use PascalCase icon filenames
-# Boosty 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
+# Title: Boosty 覆写（YAML）
+# Description: 订阅全部节点经 include-all 并入 💰 Boosty 组，只有一条 DOMAIN-SUFFIX,boosty.to
+# Version: 0.1.6
+# Last modified: 2026-10-29 00:37
+# Changelog: split header into one field per line
+#
+# 用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
 #   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
 #   Boosty 会出现在列表最顶端；要排在「节点选择」「自动选择」之后请改用 boosty.js。

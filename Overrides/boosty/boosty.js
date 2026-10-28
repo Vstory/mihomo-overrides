@@ -1,5 +1,10 @@
-// Version 0.1.5 · 2026-10-29 00:23 ── use PascalCase icon filenames
-// Boosty 覆写（JavaScript）。与 boosty.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
+// Title: Boosty 覆写（JavaScript）
+// Description: 订阅里的全部节点自动并入 💰 Boosty 组并剔除伪节点；只有一条 DOMAIN-SUFFIX,boosty.to
+// Version: 0.1.6
+// Last modified: 2026-10-29 00:37
+// Changelog: split header into one field per line
+//
+// 与 boosty.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
 //   Boosty 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
 //   内核约定：main(config) 的入参出参都是整份配置对象（goja 执行、2 秒超时、输出上限 1 MB）。

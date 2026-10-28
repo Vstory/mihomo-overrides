@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SCRIPT_VERSION=0.1.1    # 脚本版本(无模板上游, 独立维护; 内容变更 +1)
+# SCRIPT_VERSION=0.1.2    # 脚本版本(无模板上游, 独立维护; 内容变更 +1)
 """校验 mihomo-overrides 的覆写文件：结构 / 版本头 / 地区正则 / JS 实跑。
 
 用法:
@@ -51,7 +51,11 @@ REGION_KEYS = {
     'empty-fallback': 'DIRECT',
 }
 
-VERSION_RE = re.compile(r'^(?:#|//)\s+Version (\d+\.\d+\.\d+) · (\d{4}-\d{2}-\d{2} \d{2}:\d{2}) ── (.+)$')
+# 头部照 AdGuard 列表的写法：一行一个 `Key: value`，字段与顺序固定
+HEADER_FIELDS = ['Title', 'Description', 'Version', 'Last modified', 'Changelog']
+HEAD_RE = re.compile(r'^(?:#|//)\s+(' + '|'.join(HEADER_FIELDS) + r'):\s*(.*)$')
+VER_ONLY_RE = re.compile(r'^\d+\.\d+\.\d+$')
+STAMP_RE = re.compile(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$')
 
 # 节点名 → 期望命中的地区集合；空集代表不允许被任何地区组收走
 MATRIX = [
@@ -125,10 +129,16 @@ class Report:
             print(f'  skip {msg}')
 
 
-def read_version_head(path: Path) -> tuple[str, str] | None:
-    first = path.read_text(encoding='utf-8').split('\n', 1)[0]
-    m = VERSION_RE.match(first)
-    return (m.group(1), m.group(3)) if m else None
+def read_header(path: Path) -> dict[str, str]:
+    """读开头连续的 `Key: value` 元数据行；遇到首个非元数据行即停。dict 保序，顺序可用于校验。"""
+    out: dict[str, str] = {}
+    for line in path.read_text(encoding='utf-8').splitlines()[:12]:
+        m = HEAD_RE.match(line)
+        if m:
+            out[m.group(1)] = m.group(2).strip()
+        elif out:
+            break
+    return out
 
 
 def load_yaml_groups(path: Path) -> list[dict]:
@@ -246,15 +256,21 @@ def check_versions(app: str, rep: Report) -> None:
     versions = {}
     for ext in ('yaml', 'js'):
         p = app_file(app, ext)
-        head = read_version_head(p)
-        if not head:
-            rep.fail(f'{p.name}: 第 1 行版本头格式不符（应 `Version X.Y.Z · YYYY-MM-DD HH:MM ── 摘要`）')
+        head = read_header(p)
+        if list(head) != HEADER_FIELDS or not all(head.values()):
+            rep.fail(f'{p.name}: 头部应为 {HEADER_FIELDS} 且齐全，实为 {list(head)}')
             continue
-        versions[ext] = head[0]
+        if not VER_ONLY_RE.match(head['Version']):
+            rep.fail(f'{p.name}: Version 应形如 0.1.6，实为 {head["Version"]}')
+            continue
+        if not STAMP_RE.match(head['Last modified']):
+            rep.fail(f'{p.name}: Last modified 应形如 2026-10-29 00:37，实为 {head["Last modified"]}')
+            continue
+        versions[ext] = head['Version']
     if len(versions) == 2 and len(set(versions.values())) != 1:
         rep.fail(f'{app}: 两版版本号不一致 yaml={versions["yaml"]} js={versions["js"]}')
     elif len(versions) == 2:
-        rep.ok(f'版本头 {versions["yaml"]}（两版一致）')
+        rep.ok(f'版本头 {versions["yaml"]}（两版一致，五字段齐全）')
 
 
 def check_js_syntax(app: str, rep: Report) -> bool:
@@ -381,6 +397,12 @@ def check_bundle(rep: Report) -> None:
     if not node:
         rep.skip('node 不在 PATH，跳过合集脚本校验')
         return
+    head = read_header(path)
+    if list(head) != HEADER_FIELDS or not all(head.values()):
+        rep.fail(f'all.js 头部应为 {HEADER_FIELDS} 且齐全，实为 {list(head)}')
+    else:
+        rep.ok(f'头部 {head["Version"]}')
+
     r = subprocess.run([node, '--check', str(path)], capture_output=True, text=True)
     if r.returncode != 0:
         rep.fail(f'all.js 语法错误: {r.stderr.strip().splitlines()[:1]}')
