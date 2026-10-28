@@ -1,13 +1,13 @@
 # AGENTS.md
 
-本仓库存放 Mishka（mihomo）的覆写档案，按应用一个文件。改动前先读完对应章节。
+本仓库存放 Mishka（mihomo）的覆写档案，一个应用一个目录（`overrides/<app>/`）。改动前先读完对应章节。
 
 ## 仓库约束
 
 - **必须 public**：Mishka「新增覆写 → 远程下载」拿不到 token，私有仓库给不出可匿名访问的 raw 地址。
-- **一应用两形态**：`<app>.yaml`（键位覆写）与 `<app>.js`（`main(config)`），规则内容必须一致，改一个就得同步另一个。**分组位置是唯一的例外**：键位只有前插/追加，做不到插到指定位置，YAML 版固定前插，需要精确落位只能靠 JS 的 `splice`。
+- **一应用两形态**：`overrides/<app>/<app>.yaml`（键位覆写）与 `overrides/<app>/<app>.js`（`main(config)`），规则内容必须一致，改一个就得同步另一个。**分组位置是唯一的例外**：键位只有前插/追加，做不到插到指定位置，YAML 版固定前插，需要精确落位只能靠 JS 的 `splice`。
 - **图标与图标地址**只用 GitHub 官方 raw：`https://raw.githubusercontent.com/<owner>/<repo>/main/icons/<name>.png`，不加查询参数。
-- **版本头**：每个 `<app>.yaml` / `<app>.js` 的**第 1 行**放版本行（英文），两版必须同步：
+- **版本头**：每个 `overrides/<app>/<app>.yaml` / `<app>.js` 的**第 1 行**放版本行（英文），两版必须同步：
 
   ```
   # Version 0.0.1 · 2026-10-25 08:56 ── add per-country url-test groups
@@ -33,12 +33,13 @@
 
 1. **取官方图标**：官网 `apple-touch-icon.png` 优先（多数是 180×180），不要拿 `favicon.ico` 放大。
 2. **生成图片**：180×180 PNG、透明底、主体按 **25% 圆角方块**画（对齐 `DefaultGroupIcon` 的 squircle），放 `icons/<name>.png`。算法见「图标设计」。
-3. **写 `<app>.yaml`**：`+proxy-groups` 建组（带 `icon`），`+rules` 前插规则。
-4. **写 `<app>.js`**：规则与 YAML 等价；组位置用 `splice` 算，可精确落到某个组之后。
-5. **校验**：`python3 -c "import yaml;yaml.safe_load(open('<app>.yaml'))"`、`node --check <app>.js`，再用真实订阅结构跑一遍 `main(config)` 看组顺序和规则目标。
-6. **版本头**：两个文件的第 1 行写 `Version X.Y.Z · YYYY-MM-DD HH:MM ── English summary`，见「仓库约束」。
-7. **交付提醒**：图标地址不变时，使用者必须「清应用缓存 → 强制停止 → 重开」才能看到新图，原因见「改图标之后」。
-8. **组名**：跟订阅同样的命名风格（带 emoji 前缀），`name` 不要为了图标去改，见「组名保持原样」。
+3. **建目录**：`overrides/<app>/`，目录名与文件名必须一致（脚本会查）。
+4. **写 `<app>.yaml`**：`+proxy-groups` 建组（带 `icon`），`+rules` 前插规则。
+5. **写 `<app>.js`**：规则与 YAML 等价；组位置用 `splice` 算，可精确落到某个组之后。
+6. **校验**：`python3 -c "import yaml;yaml.safe_load(open('overrides/<app>/<app>.yaml'))"`、`node --check overrides/<app>/<app>.js`，再用真实订阅结构跑一遍 `main(config)` 看组顺序和规则目标。
+7. **版本头**：两个文件的第 1 行写 `Version X.Y.Z · YYYY-MM-DD HH:MM ── English summary`，见「仓库约束」。
+8. **交付提醒**：图标地址不变时，使用者必须「清应用缓存 → 强制停止 → 重开」才能看到新图，原因见「改图标之后」。
+9. **组名**：跟订阅同样的命名风格（带 emoji 前缀），`name` 不要为了图标去改，见「组名保持原样」。
 
 ## 覆写键位（源码确认，不要凭印象写）
 
@@ -70,7 +71,7 @@ JS 形态约定：定义 `main(config)`，入参出参都是整份配置对象�
 
 ## 每个应用一套文件
 
-`mega.{yaml,js}`、`boosty.{yaml,js}`，每个应用一组，互不引用。新加应用照抄结构：`<app>.yaml` 给不写脚本的人，`<app>.js` 多一层伪节点过滤和动态组引用，两版规则内容必须等价。
+`overrides/mega/{mega.yaml,mega.js}`、`overrides/boosty/{boosty.yaml,boosty.js}`，每个应用一个目录、一组文件，互不引用。新加应用照抄结构：`<app>.yaml` 给不写脚本的人，`<app>.js` 多一层伪节点过滤和动态组引用，两版规则内容必须等价。
 
 `boosty` 是个反例值得记住：它的 IP 在托管商共享段（AS42632 MnogoByte），按 IP 收必误伤；geosite 也没有独立分类。所以只有一条 `DOMAIN-SUFFIX`。**不是每个应用都能凑出「域名 + ASN + 网段」三层，凑不出就别硬凑。**
 
@@ -262,8 +263,8 @@ rule-providers:
 - [ ] 域名在前、IP 在后，IP 规则都带 `no-resolve`
 - [ ] 组名 `🌐 MEGA` 逐字一致，emoji 后有一个空格
 - [ ] 首选项里的聚合组（自动选择 / 节点选择 / 各运营商推荐节点）都真的在订阅里
-- [ ] `mega.yaml` 与 `mega.js` 的规则条目、provider 配置一致
-- [ ] 本地能加载：`python3 -c "import yaml;yaml.safe_load(open('mega.yaml'))"`、`node --check mega.js`
+- [ ] `overrides/mega/mega.yaml` 与 `mega.js` 的规则条目、provider 配置一致
+- [ ] 本地能加载：`python3 -c "import yaml;yaml.safe_load(open('overrides/mega/mega.yaml'))"`、`node --check overrides/mega/mega.js`
 - [ ] 跑一遍 `python3 scripts/check_overrides.py mega`（版本头 / 结构 / 正则矩阵 / JS 实跑一次过）
 - [ ] provider 的 mrs 地址能取到：`curl -sI <url>` 应为 200
 - [ ] 用真实订阅结构跑一遍 `main(config)`，确认旧版遗留的 `DOMAIN-SUFFIX,...,🌐 MEGA` 已被清掉
@@ -400,6 +401,7 @@ python3 scripts/check_overrides.py -q       # 只打印失败项
 
 | 检查 | 具体 |
 |---|---|
+| 目录结构 | `overrides/<app>/<app>.{yaml,js}` 成对存在，目录名与文件名一致 |
 | 版本头 | 格式 `Version X.Y.Z · YYYY-MM-DD HH:MM ── 摘要`，两版版本号一致 |
 | YAML | 可解析、`+proxy-groups` 存在 |
 | 主组结构 | `select`、`include-all`、icon 是无参数 GitHub raw、proxies 前 3 项是 `♻️自动选择 / 🚀节点选择 / DIRECT`、24 个地区组都列在首选项之后 |

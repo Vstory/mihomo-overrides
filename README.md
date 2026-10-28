@@ -1,6 +1,6 @@
 # mihomo-overrides
 
-Mishka（mihomo 内核）的覆写规则集合，按应用分文件。给订阅补分组、补分流规则，
+Mishka（mihomo 内核）的覆写规则集合，一个应用一个目录。给订阅补分组、补分流规则，
 在本机通过「远程下载」引用，机场下发的原始订阅不被改写。
 
 ## 用法
@@ -14,27 +14,39 @@ Mishka → 配置 → 覆写 → 新增：
 | 覆写地址 | 下表的 raw 地址 |
 | 文件格式 | 与所选文件对应（YAML / JavaScript） |
 
+```text
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/overrides/mega/mega.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/overrides/mega/mega.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/overrides/boosty/boosty.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/overrides/boosty/boosty.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/overrides/github/github.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/overrides/github/github.js
 ```
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/mega.yaml
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/mega.js
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/boosty.yaml
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/boosty.js
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/github.yaml
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/github.js
-```
+
+> [!IMPORTANT]
+> 地址在 2026-10-29 从根目录迁到 `overrides/<应用>/`，旧地址已失效。Mishka 里已保存的覆写要重新粘贴上面的地址。
 
 保存后在「订阅」页把覆写勾选给目标订阅。多个覆写按勾选顺序依次套用，前一个的输出是后一个的输入。
 
 ## 文件
 
-| 文件 | 应用 | 内容 |
+一个应用一个目录，`overrides/<应用>/` 下固定一对 `yaml` + `js`：
+
+```text
+overrides/
+├── boosty/   boosty.yaml  boosty.js
+├── github/   github.yaml  github.js
+└── mega/     mega.yaml    mega.js
+```
+
+| 文件（`overrides/` 下） | 应用 | 内容 |
 |------|------|------|
-| `mega.js` | MEGA 网盘 | `🌐 MEGA` 分组（**自动并入订阅全部节点**，剔掉机场伪节点）+ `GEOSITE,mega` 与自有 ASN 的网段规则（前插） |
-| `mega.yaml` | MEGA 网盘 | 同上，但节点靠 `include-all` 全量并入（伪节点会一起进来） |
-| `boosty.js` | Boosty | `💰 Boosty` 分组（同上）+ `DOMAIN-SUFFIX,boosty.to` 一条规则 |
-| `boosty.yaml` | Boosty | 同上，节点靠 `include-all` |
-| `github.js` | GitHub | `🐙 GitHub` 分组（同上）+ 13 条 `DOMAIN-SUFFIX` 规则（前插） |
-| `github.yaml` | GitHub | 同上，节点靠 `include-all` |
+| `mega/mega.js` | MEGA 网盘 | `🌐 MEGA` 分组（**自动并入订阅全部节点**，剔掉机场伪节点）+ `GEOSITE,mega` 与自有 ASN 的网段规则（前插） |
+| `mega/mega.yaml` | MEGA 网盘 | 同上，但节点靠 `include-all` 全量并入（伪节点会一起进来） |
+| `boosty/boosty.js` | Boosty | `💰 Boosty` 分组（同上）+ `DOMAIN-SUFFIX,boosty.to` 一条规则 |
+| `boosty/boosty.yaml` | Boosty | 同上，节点靠 `include-all` |
+| `github/github.js` | GitHub | `🐙 GitHub` 分组（同上）+ 13 条 `DOMAIN-SUFFIX` 规则（前插） |
+| `github/github.yaml` | GitHub | 同上，节点靠 `include-all` |
 
 图标怎么设计、规则怎么维护、改动后自查什么，见 [AGENTS.md](AGENTS.md)。
 
@@ -78,13 +90,13 @@ geosite 也没有 `boosty` 分类（只在 `MAILRU-GROUP` / `CATEGORY-RU` / `GEO
 
 两个文件都**不需要手写节点名**，订阅换节点、加节点都不用改：
 
-- `mega.js`：遍历 `proxies` 逐个取名字，过滤掉 `剩余流量 / 套餐到期 / 距离下次重置` 这类机场伪节点；
+- `mega/mega.js`：遍历 `proxies` 逐个取名字，过滤掉 `剩余流量 / 套餐到期 / 距离下次重置` 这类机场伪节点；
   节点走 `proxy-providers` 的订阅则自动用 `use` 整包引入。组头固定放 `♻️自动选择`、`🚀节点选择`（订阅里存在时）
   和 `DIRECT`，其余全是真节点。
-- `mega.yaml`：`include-all: true` 由内核并入全部节点。简单，但伪节点挡不住——`exclude-filter`
+- `mega/mega.yaml`：`include-all: true` 由内核并入全部节点。简单，但伪节点挡不住——`exclude-filter`
   只对 provider 节点生效，管不到 `include-all` 加进来的项。
 
-要「组里就是完整节点列表」，用 `mega.js`。
+要「组里就是完整节点列表」，用 `mega/mega.js`。
 
 ## 覆写语义
 
@@ -121,6 +133,6 @@ https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/mega.png
 
 ## JavaScript 版
 
-`mega.js` 与 `mega.yaml` 等价。JS 覆写的内核约定：脚本里定义 `main(config)`，
+`mega/mega.js` 与 `mega/mega.yaml` 等价。JS 覆写的内核约定：脚本里定义 `main(config)`，
 入参与返回值都是整份配置对象（2 秒超时、输出上限 1 MB）。JS 版会先剔掉同名旧规则再前插，
 同一覆写被反复选中也不会叠加。

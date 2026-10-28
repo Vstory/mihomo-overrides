@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SCRIPT_VERSION=0.0.1    # 脚本版本(无模板上游, 独立维护; 内容变更 +1)
+# SCRIPT_VERSION=0.0.2    # 脚本版本(无模板上游, 独立维护; 内容变更 +1)
 """校验 mihomo-overrides 的覆写文件：结构 / 版本头 / 地区正则 / JS 实跑。
 
 用法:
@@ -232,10 +232,14 @@ def check_matrix(defined: dict[str, dict], rep: Report) -> None:
         rep.ok(f'正则矩阵：{len(MATRIX)} 个节点名断言全过')
 
 
+def app_file(app: str, ext: str) -> Path:
+    return ROOT / 'overrides' / app / f'{app}.{ext}'
+
+
 def check_versions(app: str, rep: Report) -> None:
     versions = {}
     for ext in ('yaml', 'js'):
-        p = ROOT / f'{app}.{ext}'
+        p = app_file(app, ext)
         head = read_version_head(p)
         if not head:
             rep.fail(f'{p.name}: 第 1 行版本头格式不符（应 `Version X.Y.Z · YYYY-MM-DD HH:MM ── 摘要`）')
@@ -252,7 +256,7 @@ def check_js_syntax(app: str, rep: Report) -> bool:
     if not node:
         rep.skip('node 不在 PATH，跳过 JS 语法与实跑')
         return False
-    r = subprocess.run([node, '--check', str(ROOT / f'{app}.js')], capture_output=True, text=True)
+    r = subprocess.run([node, '--check', str(app_file(app, 'js'))], capture_output=True, text=True)
     if r.returncode != 0:
         rep.fail(f'{app}.js 语法错误: {r.stderr.strip().splitlines()[:1]}')
         return False
@@ -281,7 +285,7 @@ def check_js_run(app: str, groups: list[dict], defined: dict[str, dict], rep: Re
         cfg_file = Path(td) / 'c.json'
         cfg_file.write_text(json.dumps(cfg, ensure_ascii=False), encoding='utf-8')
         r = subprocess.run(
-            [node, str(wrapper), str(ROOT / f'{app}.js'), str(cfg_file)],
+            [node, str(wrapper), str(app_file(app, 'js')), str(cfg_file)],
             capture_output=True, text=True, timeout=60,
         )
     if r.returncode != 0:
@@ -326,10 +330,10 @@ def check_js_run(app: str, groups: list[dict], defined: dict[str, dict], rep: Re
 
 def check_app(app: str, rep: Report) -> None:
     print(f'== {app}')
-    yaml_path = ROOT / f'{app}.yaml'
-    js_path = ROOT / f'{app}.js'
+    yaml_path = app_file(app, 'yaml')
+    js_path = app_file(app, 'js')
     if not yaml_path.exists() or not js_path.exists():
-        rep.fail(f'{app}: yaml 与 js 必须成对存在')
+        rep.fail(f'{app}: overrides/{app}/ 下 yaml 与 js 必须成对存在')
         return
 
     check_versions(app, rep)
@@ -354,9 +358,14 @@ def check_app(app: str, rep: Report) -> None:
 def main(argv: list[str]) -> int:
     args = [a for a in argv[1:] if not a.startswith('-')]
     quiet = '-q' in argv or '--quiet' in argv
-
-    apps = args or sorted(p.stem for p in ROOT.glob('*.yaml'))
     rep = Report(quiet=quiet)
+
+    found = sorted(ROOT.glob('overrides/*/*.yaml'))
+    for p in found:
+        if p.stem != p.parent.name:
+            rep.fail(f'{p.relative_to(ROOT)}: 目录名与文件名必须一致（overrides/<app>/<app>.yaml）')
+
+    apps = args or [p.parent.name for p in found]
     for app in apps:
         check_app(app, rep)
 
