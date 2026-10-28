@@ -1,4 +1,4 @@
-// Version 0.1.4 · 2026-10-29 00:18 ── point group icons at Icons/png
+// Version 0.1.5 · 2026-10-29 00:23 ── use PascalCase icon filenames
 // Boosty 覆写（JavaScript）。与 boosty.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
 //   Boosty 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
@@ -9,7 +9,7 @@
 function main(config) {
   var GROUP = '💰 Boosty';
   // 组图标走 Mishka 的 IconLoader：网络图片 + 磁盘缓存，PNG 最好（BitmapFactory 不解码 .ico）
-  var ICON = 'https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Icons/png/boosty.png';
+  var ICON = 'https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Icons/png/Boosty.png';
   // 机场惯用伪节点名，命中就不进组（想连这些信息节点也能选的话，删掉这一行）
   var FAKE = /剩余流量|剩余|距离下次|套餐到期|过期|到期时间|官网|重置|流量重置/;
 

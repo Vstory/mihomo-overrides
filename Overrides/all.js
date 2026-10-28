@@ -1,4 +1,4 @@
-// Version 0.0.1 · 2026-10-29 00:18 ── merge mega / boosty / github overrides into one script
+// Version 0.0.2 · 2026-10-29 00:23 ── use PascalCase icon filenames
 // 合集覆写（JavaScript）：把 Overrides/ 下三个应用合成一份，省得逐个勾选。
 //   24 个国家/地区组只定义一次，三个主组共用；**与单应用覆写二选一**——双方的清理逻辑都会
 //   删掉同名主组，同时勾选会互相拆台。
@@ -39,18 +39,18 @@ function main(config) {
   // 每个应用一层规则，拼成 <类型>,<值>,<组名>[,no-resolve]
   var APPS = [
     {
-      group: '🌐 MEGA', icon: 'mega.png',
+      group: '🌐 MEGA', icon: 'Mega.png',
       geo: ['GEOSITE,mega'],
       cidr: ['162.208.16.0/24','185.206.24.0/24','185.206.25.0/24','185.206.26.0/24','185.206.27.0/24','217.180.20.0/24','217.180.21.0/24','31.216.144.0/24','31.216.145.0/24','31.216.146.0/24','31.216.147.0/24','31.216.148.0/24','66.203.124.0/24','66.203.125.0/24','66.203.126.0/23','82.21.172.0/24','82.29.203.0/24','82.29.204.0/24','82.29.205.0/24','82.29.206.0/24','82.29.207.0/24','89.44.168.0/24','89.44.169.0/24','94.24.36.0/24','94.24.37.0/24'],
       cidr6: ['2001:678:25c::/48','2001:67c:1998::/48','2a09:a381:100::/40','2a09:a381::/40','2a0b:e40:1::/48','2a0b:e40:2::/48','2a0b:e40:3::/48','2a0b:e41:1::/48','2a0b:e41:2::/48','2a0b:e42:1::/48','2a0b:e43:1::/48','2a0b:e43::/40','2a0b:e44:1::/48','2a0b:e44:3::/48','2a0b:e44:4::/48','2a0b:e44:5::/48','2a0b:e44:6::/48','2a0b:e44:7::/48','2a0b:e45:1::/48','2a0b:e46:1::/48'],
       asn: [203055, 205809]
     },
     {
-      group: '💰 Boosty', icon: 'boosty.png',
+      group: '💰 Boosty', icon: 'Boosty.png',
       suffix: ['boosty.to']
     },
     {
-      group: '🐙 GitHub', icon: 'github.png',
+      group: '🐙 GitHub', icon: 'GitHub.png',
       suffix: ['github.com', 'githubusercontent.com', 'githubassets.com', 'github.dev', 'github.blog', 'github.community', 'githubapp.com', 'githubpreview.dev', 'ghe.com', 'gh.io', 'git.io', 'dependabot.com', 'repo.new']
     }
   ];

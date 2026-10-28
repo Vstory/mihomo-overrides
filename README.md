@@ -136,11 +136,11 @@ Mishka 内核按 PC 版的键位规则合并（`app/src/main/native/mishka_core/
 分组用 mihomo 的 `icon:` 字段，值是图片 URL。Mishka 的 `IconLoader` 会下载并缓存到磁盘，
 代理运行中时自动经 mihomo mixed-port 取图，所以图标也不会卡在墙外。
 
-图标按格式分开存：`Icons/png/` 是真正给 `icon:` 用的图，取自官方 180×180 的 apple-touch-icon，
-已把外围白底做成透明：
+图标按格式分开存：`Icons/png/` 是真正给 `icon:` 用的图，文件名 PascalCase（`Mega.png`、`GitHub.png`），
+取自官方 180×180 的 apple-touch-icon，已把外围白底做成透明：
 
 ```
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Icons/png/mega.png
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Icons/png/Mega.png
 ```
 
 `Icons/svg/` 留给矢量源（目前空着）。**SVG 现在还不能用**：Mishka 的 `IconLoader` 最后一步是

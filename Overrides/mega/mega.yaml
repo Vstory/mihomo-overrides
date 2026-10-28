@@ -1,4 +1,4 @@
-# Version 0.1.4 · 2026-10-29 00:18 ── point group icons at Icons/png
+# Version 0.1.5 · 2026-10-29 00:23 ── use PascalCase icon filenames
 # MEGA 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
 #   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
@@ -22,7 +22,7 @@
 +proxy-groups:
   - name: 🌐 MEGA
     type: select
-    icon: https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Icons/png/mega.png
+    icon: https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Icons/png/Mega.png
     include-all: true
     proxies:
       - ♻️自动选择

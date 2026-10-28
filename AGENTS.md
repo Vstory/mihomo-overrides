@@ -7,7 +7,7 @@
 - **必须 public**：Mishka「新增覆写 → 远程下载」拿不到 token，私有仓库给不出可匿名访问的 raw 地址。
 - **一应用两形态**：`Overrides/<app>/<app>.yaml`（键位覆写）与 `Overrides/<app>/<app>.js`（`main(config)`），规则内容必须一致，改一个就得同步另一个。**分组位置是唯一的例外**：键位只有前插/追加，做不到插到指定位置，YAML 版固定前插，需要精确落位只能靠 JS 的 `splice`。
 - **合集 `Overrides/all.js` 只有 JS 形态**：YAML 键位没有条件判断，凑不出「24 个地区组只定义一次、三个主组共用」的结构。它与单应用覆写**二选一**，同时勾选会互相删同名主组。
-- **图标与图标地址**只用 GitHub 官方 raw：`https://raw.githubusercontent.com/<owner>/<repo>/main/Icons/png/<name>.png`，不加查询参数。
+- **图标与图标地址**只用 GitHub 官方 raw：`https://raw.githubusercontent.com/<owner>/<repo>/main/Icons/png/<Name>.png`，不加查询参数。
 - **版本头**：每个 `Overrides/<app>/<app>.yaml` / `<app>.js` 的**第 1 行**放版本行（英文），两版必须同步：
 
   ```
@@ -33,7 +33,7 @@
 ### 新增一个应用，按这个顺序做
 
 1. **取官方图标**：官网 `apple-touch-icon.png` 优先（多数是 180×180），不要拿 `favicon.ico` 放大。
-2. **生成图片**：180×180 PNG、透明底、主体按 **25% 圆角方块**画（对齐 `DefaultGroupIcon` 的 squircle），放 `Icons/png/<name>.png`。算法见「图标设计」。
+2. **生成图片**：180×180 PNG、透明底、主体按 **25% 圆角方块**画（对齐 `DefaultGroupIcon` 的 squircle），放 `Icons/png/<Name>.png`（PascalCase）。算法见「图标设计」。
 3. **建目录**：`Overrides/<app>/`，目录名与文件名必须一致（脚本会查）。
 4. **写 `<app>.yaml`**：`+proxy-groups` 建组（带 `icon`），`+rules` 前插规则。
 5. **写 `<app>.js`**：规则与 YAML 等价；组位置用 `splice` 算，可精确落到某个组之后。
@@ -130,6 +130,7 @@ BitmapFactory 不认 SVG，填了只会解码失败、回退成组名首字。�
 
 | 项 | 要求 | 原因 |
 |----|------|------|
+| 命名 | PascalCase、无连字符 | 对齐 MyClash.F 的 `Icons/`；`Scripts/check_overrides.py` 查首字母大写 |
 | 格式 | PNG / JPEG / WebP | 解码走 `BitmapFactory`，`.ico` 解不出来 |
 | 尺寸 | 180×180 | 显示 32dp，5x 屏约 160px，原生即可，不要插值放大 |
 | 形状 | 圆角方块，圆角 = 边长 × 8/32 = **25%** | 对齐 `DefaultGroupIcon` 的 squircle |
@@ -181,7 +182,7 @@ for y in range(bh):
 out = Image.new('RGBA', (S, S), (0, 0, 0, 0))
 ImageDraw.Draw(out).rounded_rectangle([0, 0, S - 1, S - 1], radius=RADIUS, fill=RED + (255,))
 out.paste(Image.new('RGBA', (S, S), (255, 255, 255, 255)), (0, 0), mask.resize((S, S), Image.LANCZOS))
-out.save('Icons/png/<name>.png')
+out.save('Icons/png/<Name>.png')
 ```
 
 蒙版撑满画布，字标自然落在画布约六成的位置，与官方图标里字标占圆的比例一致——别再额外缩小。
@@ -190,26 +191,26 @@ out.save('Icons/png/<name>.png')
 
 第一版从四角白底 flood fill 清透明，四角是干净了，但圆形抗锯齿边缘是白与红的混合色，阈值扫不到，深色背景下留一圈白点，看着像光晕。
 
-结论：**不要抠背景，直接重画几何形状**。圆角方块用 `rounded_rectangle` 画，边缘天然干净；要圆形版就把距离场那套拿来用（`Icons/png/mega-round.png` 就是这么来的），边缘两像素涂主色、最外一像素 alpha 渐变。
+结论：**不要抠背景，直接重画几何形状**。圆角方块用 `rounded_rectangle` 画，边缘天然干净；要圆形版就把距离场那套拿来用（`Icons/png/MegaRound.png` 就是这么来的），边缘两像素涂主色、最外一像素 alpha 渐变。
 
 ### 验收
 
 ```bash
 # 四角必须全透明
-python3 -c "from PIL import Image;i=Image.open('Icons/png/<name>.png');print(i.size,i.mode,i.getpixel((0,0))[3])"
+python3 -c "from PIL import Image;i=Image.open('Icons/png/<Name>.png');print(i.size,i.mode,i.getpixel((0,0))[3])"
 
 # 和兜底图标并排：同尺寸、同圆角，不能显大或显小
 python3 -c "
 from PIL import Image, ImageDraw
 S=128; c=Image.new('RGBA',(S*2+120,S+100),(36,36,38,255)); d=ImageDraw.Draw(c)
 for i in range(2): d.rounded_rectangle([60+i*(S+60),50,60+i*(S+60)+S-1,50+S-1],radius=int(S*8/32),fill=(58,60,68,255))
-c.alpha_composite(Image.open('Icons/png/<name>.png').resize((S,S),Image.LANCZOS),(60+(S+60),50))
+c.alpha_composite(Image.open('Icons/png/<Name>.png').resize((S,S),Image.LANCZOS),(60+(S+60),50))
 c.convert('RGB').save('/tmp/shape_check.png')"
 ```
 
 `/tmp/shape_check.png` 打开看：方块的大小、圆角弧度要和灰色兜底块完全对上。
 
-圆形版另存为 `Icons/png/<name>-round.png`（当前的 MEGA 圆形 logo 在 `Icons/png/mega-round.png`），想切回官方形状就换 URL 末段。
+圆形版另存为 `Icons/png/<Name>Round.png`（当前的 MEGA 圆形 logo 在 `Icons/png/MegaRound.png`），想切回官方形状就换 URL 末段。
 
 ### 改图标之后
 

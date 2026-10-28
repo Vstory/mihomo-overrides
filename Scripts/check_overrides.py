@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SCRIPT_VERSION=0.1.0    # 脚本版本(无模板上游, 独立维护; 内容变更 +1)
+# SCRIPT_VERSION=0.1.1    # 脚本版本(无模板上游, 独立维护; 内容变更 +1)
 """校验 mihomo-overrides 的覆写文件：结构 / 版本头 / 地区正则 / JS 实跑。
 
 用法:
@@ -160,6 +160,9 @@ def check_structure(groups: list[dict], rep: Report) -> list[str]:
     icon = str(main_group.get('icon', ''))
     if not icon.startswith('https://raw.githubusercontent.com/') or '/Icons/png/' not in icon or '?' in icon:
         rep.fail(f'{name}: icon 应是无参数的 Icons/png 下 GitHub raw 地址: {icon}')
+    ink = icon.rsplit('/', 1)[-1]
+    if '/Icons/png/' in icon and (not ink or not ink[0].isupper()):
+        rep.fail(f'{name}: 图标文件名要 PascalCase，实为 {ink}')
 
     proxies = main_group.get('proxies') or []
     head = proxies[:3]
@@ -413,6 +416,9 @@ def check_bundle(rep: Report) -> None:
         icon = str(g.get('icon', ''))
         if '/Icons/png/' not in icon or '?' in icon:
             rep.fail(f'{name}: icon 应指向 Icons/png 且无参数，实为 {icon}')
+        ink = icon.rsplit('/', 1)[-1]
+        if not ink or not ink[0].isupper():
+            rep.fail(f'{name}: 图标文件名要 PascalCase，实为 {ink}')
         leaked = [n for n in FAKE_NODES if n in proxies]
         if leaked:
             rep.fail(f'{name}: 伪节点混进主组 {leaked}')
