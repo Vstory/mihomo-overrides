@@ -6,7 +6,7 @@
 
 - **必须 public**：Mishka「新增覆写 → 远程下载」拿不到 token，私有仓库给不出可匿名访问的 raw 地址。
 - **一应用两形态**：`Overrides/<app>/<app>.yaml`（键位覆写）与 `Overrides/<app>/<app>.js`（`main(config)`），规则内容必须一致，改一个就得同步另一个。**分组位置是唯一的例外**：键位只有前插/追加，做不到插到指定位置，YAML 版固定前插，需要精确落位只能靠 JS 的 `splice`。
-- **合集 `Overrides/all.js` 只有 JS 形态**：YAML 键位没有条件判断，凑不出「24 个地区组只定义一次、三个主组共用」的结构。它与单应用覆写**二选一**，同时勾选会互相删同名主组。
+- **合集 `Overrides/all.js` 只有 JS 形态**：YAML 键位没有条件判断，凑不出「24 个地区组只定义一次、各主组共用」的结构。它与单应用覆写**二选一**，同时勾选会互相删同名主组。
 - **图标与图标地址**只用 GitHub 官方 raw：`https://raw.githubusercontent.com/<owner>/<repo>/main/Icons/png/<Name>.png`，不加查询参数。
 - **头部**：照 AdGuard 过滤列表的写法，文件开头连续五行 `Key: value`，一行一个字段，顺序固定：
 
@@ -85,9 +85,9 @@ JS 形态约定：定义 `main(config)`，入参出参都是整份配置对象�
 
 ## 合集覆写 `Overrides/all.js`
 
-三个应用的规则合到一份，只提供 JS 形态：
+四个应用的规则合到一份，只提供 JS 形态：
 
-- **地区组只建一次**：24 个国旗组由合集建好，三个主组共用。组名是 `🇭🇰 香港`（国旗），
+- **地区组只建一次**：24 个国旗组由合集建好，各主组共用。组名是 `🇭🇰 香港`（国旗），
   不是 YAML 版的应用前缀名 `🌐 香港`，所以和 YAML 版并存也不撞名。
 - **地区组不能进 `drop`**：合集靠「已存在就复用」避免重复定义，一旦把国旗组放进 drop，
   复用命中会让它们既不重建又被删掉——连套两次，第三份配置就少了 24 组。单应用脚本里 drop 的
@@ -422,7 +422,7 @@ JS 里同一个正则要出现两次：清单存**不带** `(?i)` 的裸正则�
 改完一律跑脚本，不要手搓命令：
 
 ```bash
-python3 Scripts/check_overrides.py          # 全量（三个应用）
+python3 Scripts/check_overrides.py          # 全量（全部应用）
 python3 Scripts/check_overrides.py mega     # 只查一个应用
 python3 Scripts/check_overrides.py -q       # 只打印失败项
 ```
@@ -439,6 +439,6 @@ python3 Scripts/check_overrides.py -q       # 只打印失败项
 | 正则质量 | 两字母代码必须有 `\b`（按 `\|` 拆段判定）、印度必须带 `(?!尼西亚)`、filter 里不能有退格符 |
 | 正则矩阵 | 29 条节点名 → 期望地区断言（含 `Russia-01` 不进美国、`Sweden-01` 不进德国、`印尼` 不进印度） |
 | JS | `node --check` + 假订阅实跑：首选项顺序、24 个地区组、伪节点剔除、JS 与 YAML 的 filter 逐字一致 |
-| 合集 | 组名唯一、三个主组顺序、icon 指向 `Icons/png`、地区组共用 24 个、filter 与 `mega.yaml` 一致、连套两次幂等 |
+| 合集 | 组名唯一、主组顺序、icon 指向 `Icons/png`、地区组共用 24 个、filter 与 `mega.yaml` 一致、连套两次幂等 |
 
 需要 `node` 才跑 JS 部分，没有 node 会自动 skip。改脚本本身按知识库脚本规则升 `SCRIPT_VERSION`（版本历史写提交信息，不写进脚本）。

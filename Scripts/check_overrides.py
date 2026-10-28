@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SCRIPT_VERSION=0.1.2    # 脚本版本(无模板上游, 独立维护; 内容变更 +1)
+# SCRIPT_VERSION=0.1.3    # 脚本版本(无模板上游, 独立维护; 内容变更 +1)
 """校验 mihomo-overrides 的覆写文件：结构 / 版本头 / 地区正则 / JS 实跑。
 
 用法:
@@ -31,8 +31,8 @@ REGION_NAMES = [
 
 HEAD_ORDER = ['♻️自动选择', '🚀节点选择', 'DIRECT']
 
-# 合集覆写里的三个主组，顺序即插入顺序
-BUNDLE_GROUPS = ['🌐 MEGA', '💰 Boosty', '🐙 GitHub']
+# 合集覆写里的主组，顺序即插入顺序
+BUNDLE_GROUPS = ['🌐 MEGA', '💰 Boosty', '🐙 GitHub', '🔞 Pornhub']
 
 FLAGS = {
     '香港': '🇭🇰', '台湾': '🇹🇼', '日本': '🇯🇵', '韩国': '🇰🇷', '新加坡': '🇸🇬', '美国': '🇺🇸',
@@ -449,7 +449,7 @@ def check_bundle(rep: Report) -> None:
     if len([n for n in names if n in region_names]) != len(REGION_NAMES):
         rep.fail(f'all.js 国旗地区组应有 {len(REGION_NAMES)} 个，实为 {len([n for n in names if n in region_names])}')
     else:
-        rep.ok(f'三个主组共用 {len(region_names)} 个国旗地区组')
+        rep.ok(f'各主组共用 {len(region_names)} 个国旗地区组')
 
     # 地区组清单在三处存在（yaml / 单应用 js / 合集），filter 必须逐字同源
     defined = {g['name']: g for g in load_yaml_groups(app_file('mega', 'yaml'))[1:] if g.get('name')}

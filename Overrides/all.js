@@ -1,11 +1,11 @@
 // Title: MEGA / Boosty / GitHub 合集覆写（JavaScript）
-// Description: 三个应用合成一份，24 个国家/地区组只定义一次、三个主组共用；与单应用覆写二选一
-// Version: 0.0.3
+// Description: 四个应用合成一份，24 个国家/地区组只定义一次、四个主组共用；与单应用覆写二选一
+// Version: 0.0.4
 // Last modified: 2026-10-29 00:37
-// Changelog: split header into one field per line
+// Changelog: add Pornhub group
 //
-// 把 Overrides/ 下三个应用合成一份，省得逐个勾选。
-//   24 个国家/地区组只定义一次，三个主组共用；**与单应用覆写二选一**——双方的清理逻辑都会
+// 把 Overrides/ 下四个应用合成一份，省得逐个勾选。
+//   24 个国家/地区组只定义一次，四个主组共用；**与单应用覆写二选一**——双方的清理逻辑都会
 //   删掉同名主组，同时勾选会互相拆台。
 //   内核约定：main(config) 的入参出参都是整份配置对象（goja 执行、2 秒超时、输出上限 1 MB）。
 function main(config) {
@@ -57,6 +57,10 @@ function main(config) {
     {
       group: '🐙 GitHub', icon: 'GitHub.png',
       suffix: ['github.com', 'githubusercontent.com', 'githubassets.com', 'github.dev', 'github.blog', 'github.community', 'githubapp.com', 'githubpreview.dev', 'ghe.com', 'gh.io', 'git.io', 'dependabot.com', 'repo.new']
+    },
+    {
+      group: '🔞 Pornhub', icon: 'Pornhub.png',
+      suffix: ['pornhub.com', 'pornhubpremium.com', 'pornhub.org', 'pornhub-deutsch.net', 'pornhubapparel.com', 'phncdn.com', 'phprcdn.com', 'gaytube.com', 'porngub.com']
     }
   ];
 
@@ -98,7 +102,7 @@ function main(config) {
     if (Object.prototype.hasOwnProperty.call(pp, pk)) use.push(pk);
   }
 
-  // ---- 国家/地区组：全仓库只建这一份，三个主组共用 ----
+  // ---- 国家/地区组：全仓库只建这一份，各主组共用 ----
   // 内联订阅只为有节点的地区建组；provider 订阅读不到节点名，只能全建，空组靠 empty-fallback 落 DIRECT
   var inlineScan = nodeNames.length > 0;
   var hit = {};
@@ -136,7 +140,7 @@ function main(config) {
     });
   }
 
-  // ---- 三个主组 + 各自规则 ----
+  // ---- 主组 + 各自规则 ----
   var drop = {};
   var newGroups = [];
   var newRules = [];
@@ -168,7 +172,7 @@ function main(config) {
     if (!curGroups[i] || !drop[curGroups[i].name]) rest.push(curGroups[i]);
   }
 
-  // 三个主组一次插入锚点之后，保持 MEGA → Boosty → GitHub 的顺序；
+  // 主组一次插入锚点之后，保持 MEGA → Boosty → GitHub → Pornhub 的顺序；
   // 锚点都不存在时 insertAt=0，退回最前
   var anchors = ['🚀节点选择', '♻️自动选择'];
   var insertAt = 0;
