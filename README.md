@@ -15,31 +15,36 @@ Mishka → 配置 → 覆写 → 新增：
 | 文件格式 | 与所选文件对应（YAML / JavaScript） |
 
 ```text
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/overrides/mega/mega.yaml
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/overrides/mega/mega.js
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/overrides/boosty/boosty.yaml
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/overrides/boosty/boosty.js
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/overrides/github/github.yaml
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/overrides/github/github.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/all.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/mega/mega.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/mega/mega.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/boosty/boosty.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/boosty/boosty.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/github/github.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/github/github.js
 ```
 
+`all.js` 是三个应用的合集，勾一个就全生效；其余六个是单个应用，按需选。**合集与单应用二选一**，
+同时勾选会互相删同名主组。
+
 > [!IMPORTANT]
-> 地址在 2026-10-29 从根目录迁到 `overrides/<应用>/`，旧地址已失效。Mishka 里已保存的覆写要重新粘贴上面的地址。
+> 地址在 2026-10-29 迁到 `Overrides/` 下（此前在仓库根目录），旧地址已失效。Mishka 里已保存的覆写要重新粘贴上面的地址。
 
 保存后在「订阅」页把覆写勾选给目标订阅。多个覆写按勾选顺序依次套用，前一个的输出是后一个的输入。
 
 ## 文件
 
-一个应用一个目录，`overrides/<应用>/` 下固定一对 `yaml` + `js`：
+一个应用一个目录，`Overrides/<应用>/` 下固定一对 `yaml` + `js`；`all.js` 是覆盖全部应用的合集：
 
 ```text
-overrides/
+Overrides/
+├── all.js             三个应用的合集（与单应用二选一）
 ├── boosty/   boosty.yaml  boosty.js
 ├── github/   github.yaml  github.js
 └── mega/     mega.yaml    mega.js
 ```
 
-| 文件（`overrides/` 下） | 应用 | 内容 |
+| 文件（`Overrides/` 下） | 应用 | 内容 |
 |------|------|------|
 | `mega/mega.js` | MEGA 网盘 | `🌐 MEGA` 分组（**自动并入订阅全部节点**，剔掉机场伪节点）+ `GEOSITE,mega` 与自有 ASN 的网段规则（前插） |
 | `mega/mega.yaml` | MEGA 网盘 | 同上，但节点靠 `include-all` 全量并入（伪节点会一起进来） |
@@ -48,6 +53,18 @@ overrides/
 | `github/github.js` | GitHub | `🐙 GitHub` 分组（同上）+ 13 条 `DOMAIN-SUFFIX` 规则（前插） |
 | `github/github.yaml` | GitHub | 同上，节点靠 `include-all` |
 
+### 合集 `all.js`
+
+`Overrides/all.js` 把三个应用的规则合成一份，成立的前提是**地区组全仓库只定义一次**：
+
+- 24 个国家/地区组（`🇭🇰 香港` 这种国旗名）由合集建一次，`🌐 MEGA`、`💰 Boosty`、`🐙 GitHub`
+  三个主组共用同一批成员，不会出现三份同名组
+- 规则按 MEGA（`GEOSITE,mega` + 45 条 IP）→ Boosty（1 条）→ GitHub（13 条）的顺序前插，
+  三个目标组各管各的
+- 反复勾选同一覆写不叠加：同名主组先删后建、国旗地区组靠查重复用
+
+**必须二选一**：合集与单应用覆写的清理逻辑都会删掉同名主组，同时勾选会互相拆台。
+
 图标怎么设计、规则怎么维护、改动后自查什么，见 [AGENTS.md](AGENTS.md)。
 
 ## 校验
@@ -55,14 +72,15 @@ overrides/
 改完覆写一律跑脚本，不要手搓命令：
 
 ```bash
-python3 scripts/check_overrides.py          # 全部应用
-python3 scripts/check_overrides.py mega     # 只查一个
-python3 scripts/check_overrides.py -q       # 只列失败项
+python3 Scripts/check_overrides.py          # 全部应用
+python3 Scripts/check_overrides.py mega     # 只查一个
+python3 Scripts/check_overrides.py -q       # 只列失败项
 ```
 
 查两版版本号一致性、主组与 24 个国家/地区组的字段、正则词边界与「节点名 × 地区」矩阵，
-并用假订阅实跑 JS（首选项顺序 / 地区组 / 伪节点剔除）。需要 `node` 才跑 JS 部分，没有会自动跳过。
-退出码 `1` 表示有失败。
+并用假订阅实跑 JS（首选项顺序 / 地区组 / 伪节点剔除）。合集 `all.js` 另查一组：组名唯一、
+三个主组顺序、地区组 filter 与 `mega.yaml` 逐条一致、连套两次不叠加。需要 `node` 才跑 JS 部分，
+没有会自动跳过。退出码 `1` 表示有失败。
 
 ## GitHub 只收核心域名
 
@@ -118,13 +136,18 @@ Mishka 内核按 PC 版的键位规则合并（`app/src/main/native/mishka_core/
 分组用 mihomo 的 `icon:` 字段，值是图片 URL。Mishka 的 `IconLoader` 会下载并缓存到磁盘，
 代理运行中时自动经 mihomo mixed-port 取图，所以图标也不会卡在墙外。
 
-图标文件放在 `icons/`，取自官方 180×180 的 apple-touch-icon，已把外围白底做成透明：
+图标按格式分开存：`Icons/png/` 是真正给 `icon:` 用的图，取自官方 180×180 的 apple-touch-icon，
+已把外围白底做成透明：
 
 ```
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/mega.png
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Icons/png/mega.png
 ```
 
-注意只能用 PNG / JPEG / WebP——解码走 `BitmapFactory`，`.ico` 解不出来。
+`Icons/svg/` 留给矢量源（目前空着）。**SVG 现在还不能用**：Mishka 的 `IconLoader` 最后一步是
+`BitmapFactory.decodeByteArray()`，它不认 SVG，填了只会解码失败、回退成组名首字。
+要等上游支持（[Mishka](https://github.com/YuKongA/Mishka) 的 `ui/platform/IconLoader.kt`）才切得过去。
+
+能用的格式只有 PNG / JPEG / WebP——同样是因为 `BitmapFactory`，`.ico` 也解不出来。
 
 ## 适配自己的订阅
 

@@ -1,13 +1,14 @@
 # AGENTS.md
 
-本仓库存放 Mishka（mihomo）的覆写档案，一个应用一个目录（`overrides/<app>/`）。改动前先读完对应章节。
+本仓库存放 Mishka（mihomo）的覆写档案，一个应用一个目录（`Overrides/<app>/`）。改动前先读完对应章节。
 
 ## 仓库约束
 
 - **必须 public**：Mishka「新增覆写 → 远程下载」拿不到 token，私有仓库给不出可匿名访问的 raw 地址。
-- **一应用两形态**：`overrides/<app>/<app>.yaml`（键位覆写）与 `overrides/<app>/<app>.js`（`main(config)`），规则内容必须一致，改一个就得同步另一个。**分组位置是唯一的例外**：键位只有前插/追加，做不到插到指定位置，YAML 版固定前插，需要精确落位只能靠 JS 的 `splice`。
-- **图标与图标地址**只用 GitHub 官方 raw：`https://raw.githubusercontent.com/<owner>/<repo>/main/icons/<name>.png`，不加查询参数。
-- **版本头**：每个 `overrides/<app>/<app>.yaml` / `<app>.js` 的**第 1 行**放版本行（英文），两版必须同步：
+- **一应用两形态**：`Overrides/<app>/<app>.yaml`（键位覆写）与 `Overrides/<app>/<app>.js`（`main(config)`），规则内容必须一致，改一个就得同步另一个。**分组位置是唯一的例外**：键位只有前插/追加，做不到插到指定位置，YAML 版固定前插，需要精确落位只能靠 JS 的 `splice`。
+- **合集 `Overrides/all.js` 只有 JS 形态**：YAML 键位没有条件判断，凑不出「24 个地区组只定义一次、三个主组共用」的结构。它与单应用覆写**二选一**，同时勾选会互相删同名主组。
+- **图标与图标地址**只用 GitHub 官方 raw：`https://raw.githubusercontent.com/<owner>/<repo>/main/Icons/png/<name>.png`，不加查询参数。
+- **版本头**：每个 `Overrides/<app>/<app>.yaml` / `<app>.js` 的**第 1 行**放版本行（英文），两版必须同步：
 
   ```
   # Version 0.0.1 · 2026-10-25 08:56 ── add per-country url-test groups
@@ -32,11 +33,11 @@
 ### 新增一个应用，按这个顺序做
 
 1. **取官方图标**：官网 `apple-touch-icon.png` 优先（多数是 180×180），不要拿 `favicon.ico` 放大。
-2. **生成图片**：180×180 PNG、透明底、主体按 **25% 圆角方块**画（对齐 `DefaultGroupIcon` 的 squircle），放 `icons/<name>.png`。算法见「图标设计」。
-3. **建目录**：`overrides/<app>/`，目录名与文件名必须一致（脚本会查）。
+2. **生成图片**：180×180 PNG、透明底、主体按 **25% 圆角方块**画（对齐 `DefaultGroupIcon` 的 squircle），放 `Icons/png/<name>.png`。算法见「图标设计」。
+3. **建目录**：`Overrides/<app>/`，目录名与文件名必须一致（脚本会查）。
 4. **写 `<app>.yaml`**：`+proxy-groups` 建组（带 `icon`），`+rules` 前插规则。
 5. **写 `<app>.js`**：规则与 YAML 等价；组位置用 `splice` 算，可精确落到某个组之后。
-6. **校验**：`python3 -c "import yaml;yaml.safe_load(open('overrides/<app>/<app>.yaml'))"`、`node --check overrides/<app>/<app>.js`，再用真实订阅结构跑一遍 `main(config)` 看组顺序和规则目标。
+6. **校验**：`python3 -c "import yaml;yaml.safe_load(open('Overrides/<app>/<app>.yaml'))"`、`node --check Overrides/<app>/<app>.js`，再用真实订阅结构跑一遍 `main(config)` 看组顺序和规则目标。
 7. **版本头**：两个文件的第 1 行写 `Version X.Y.Z · YYYY-MM-DD HH:MM ── English summary`，见「仓库约束」。
 8. **交付提醒**：图标地址不变时，使用者必须「清应用缓存 → 强制停止 → 重开」才能看到新图，原因见「改图标之后」。
 9. **组名**：跟订阅同样的命名风格（带 emoji 前缀），`name` 不要为了图标去改，见「组名保持原样」。
@@ -71,15 +72,36 @@ JS 形态约定：定义 `main(config)`，入参出参都是整份配置对象�
 
 ## 每个应用一套文件
 
-`overrides/mega/{mega.yaml,mega.js}`、`overrides/boosty/{boosty.yaml,boosty.js}`，每个应用一个目录、一组文件，互不引用。新加应用照抄结构：`<app>.yaml` 给不写脚本的人，`<app>.js` 多一层伪节点过滤和动态组引用，两版规则内容必须等价。
+`Overrides/mega/{mega.yaml,mega.js}`、`Overrides/boosty/{boosty.yaml,boosty.js}`，每个应用一个目录、一组文件，互不引用。新加应用照抄结构：`<app>.yaml` 给不写脚本的人，`<app>.js` 多一层伪节点过滤和动态组引用，两版规则内容必须等价。
 
 `boosty` 是个反例值得记住：它的 IP 在托管商共享段（AS42632 MnogoByte），按 IP 收必误伤；geosite 也没有独立分类。所以只有一条 `DOMAIN-SUFFIX`。**不是每个应用都能凑出「域名 + ASN + 网段」三层，凑不出就别硬凑。**
+
+## 合集覆写 `Overrides/all.js`
+
+三个应用的规则合到一份，只提供 JS 形态：
+
+- **地区组只建一次**：24 个国旗组由合集建好，三个主组共用。组名是 `🇭🇰 香港`（国旗），
+  不是 YAML 版的应用前缀名 `🌐 香港`，所以和 YAML 版并存也不撞名。
+- **地区组不能进 `drop`**：合集靠「已存在就复用」避免重复定义，一旦把国旗组放进 drop，
+  复用命中会让它们既不重建又被删掉——连套两次，第三份配置就少了 24 组。单应用脚本里 drop 的
+  是 YAML 版前缀名（`🌐 香港`），与自建的国旗名不同，所以那边没这个坑。
+- **清单三处同源**：合集的 `REGIONS` 必须与 `Overrides/<app>/<app>.js` 逐字相同，改一处就得同步；
+  `Scripts/check_overrides.py` 会把合集的 filter 与 `mega.yaml` 逐条比对。
+- **改完跑** `python3 Scripts/check_overrides.py`，合集那段以 `== all` 开头。
 
 ## 图标设计
 
 ### 渲染链路
 
 `mihomo` group 的 `icon` 字段（`adapter/outboundgroup/selector.go` 里的 `"icon": s.Icon()`）→ REST `/proxies` → `ProxyGroupDetail.icon` → `ProxyGroupUi.icon` → Mishka 的 `GroupIcon` 组件 → `IconLoader.loadIcon(url)`。下载失败时回退成组名首字，所以看不到图标先怀疑下载，而不是怀疑字段没传。
+
+### 只有 PNG 能当 icon
+
+`Icons/png/` 放实际给 `icon:` 用的图，`Icons/svg/` 放矢量源存档。
+
+**SVG 现在不能用**：`IconLoader.loadIcon()` 收尾是 `BitmapFactory.decodeByteArray().asImageBitmap()`，
+BitmapFactory 不认 SVG，填了只会解码失败、回退成组名首字。等上游 [Mishka](https://github.com/YuKongA/Mishka)
+支持后再把 `icon:` 指过去；那之前 `Icons/svg/` 只是一个空壳。
 
 ### 两种图标，别把形状做歪
 
@@ -159,7 +181,7 @@ for y in range(bh):
 out = Image.new('RGBA', (S, S), (0, 0, 0, 0))
 ImageDraw.Draw(out).rounded_rectangle([0, 0, S - 1, S - 1], radius=RADIUS, fill=RED + (255,))
 out.paste(Image.new('RGBA', (S, S), (255, 255, 255, 255)), (0, 0), mask.resize((S, S), Image.LANCZOS))
-out.save('icons/<name>.png')
+out.save('Icons/png/<name>.png')
 ```
 
 蒙版撑满画布，字标自然落在画布约六成的位置，与官方图标里字标占圆的比例一致——别再额外缩小。
@@ -168,26 +190,26 @@ out.save('icons/<name>.png')
 
 第一版从四角白底 flood fill 清透明，四角是干净了，但圆形抗锯齿边缘是白与红的混合色，阈值扫不到，深色背景下留一圈白点，看着像光晕。
 
-结论：**不要抠背景，直接重画几何形状**。圆角方块用 `rounded_rectangle` 画，边缘天然干净；要圆形版就把距离场那套拿来用（`icons/mega-round.png` 就是这么来的），边缘两像素涂主色、最外一像素 alpha 渐变。
+结论：**不要抠背景，直接重画几何形状**。圆角方块用 `rounded_rectangle` 画，边缘天然干净；要圆形版就把距离场那套拿来用（`Icons/png/mega-round.png` 就是这么来的），边缘两像素涂主色、最外一像素 alpha 渐变。
 
 ### 验收
 
 ```bash
 # 四角必须全透明
-python3 -c "from PIL import Image;i=Image.open('icons/<name>.png');print(i.size,i.mode,i.getpixel((0,0))[3])"
+python3 -c "from PIL import Image;i=Image.open('Icons/png/<name>.png');print(i.size,i.mode,i.getpixel((0,0))[3])"
 
 # 和兜底图标并排：同尺寸、同圆角，不能显大或显小
 python3 -c "
 from PIL import Image, ImageDraw
 S=128; c=Image.new('RGBA',(S*2+120,S+100),(36,36,38,255)); d=ImageDraw.Draw(c)
 for i in range(2): d.rounded_rectangle([60+i*(S+60),50,60+i*(S+60)+S-1,50+S-1],radius=int(S*8/32),fill=(58,60,68,255))
-c.alpha_composite(Image.open('icons/<name>.png').resize((S,S),Image.LANCZOS),(60+(S+60),50))
+c.alpha_composite(Image.open('Icons/png/<name>.png').resize((S,S),Image.LANCZOS),(60+(S+60),50))
 c.convert('RGB').save('/tmp/shape_check.png')"
 ```
 
 `/tmp/shape_check.png` 打开看：方块的大小、圆角弧度要和灰色兜底块完全对上。
 
-圆形版另存为 `icons/<name>-round.png`（当前的 MEGA 圆形 logo 在 `icons/mega-round.png`），想切回官方形状就换 URL 末段。
+圆形版另存为 `Icons/png/<name>-round.png`（当前的 MEGA 圆形 logo 在 `Icons/png/mega-round.png`），想切回官方形状就换 URL 末段。
 
 ### 改图标之后
 
@@ -263,9 +285,9 @@ rule-providers:
 - [ ] 域名在前、IP 在后，IP 规则都带 `no-resolve`
 - [ ] 组名 `🌐 MEGA` 逐字一致，emoji 后有一个空格
 - [ ] 首选项里的聚合组（自动选择 / 节点选择 / 各运营商推荐节点）都真的在订阅里
-- [ ] `overrides/mega/mega.yaml` 与 `mega.js` 的规则条目、provider 配置一致
-- [ ] 本地能加载：`python3 -c "import yaml;yaml.safe_load(open('overrides/mega/mega.yaml'))"`、`node --check overrides/mega/mega.js`
-- [ ] 跑一遍 `python3 scripts/check_overrides.py mega`（版本头 / 结构 / 正则矩阵 / JS 实跑一次过）
+- [ ] `Overrides/mega/mega.yaml` 与 `mega.js` 的规则条目、provider 配置一致
+- [ ] 本地能加载：`python3 -c "import yaml;yaml.safe_load(open('Overrides/mega/mega.yaml'))"`、`node --check Overrides/mega/mega.js`
+- [ ] 跑一遍 `python3 Scripts/check_overrides.py mega`（版本头 / 结构 / 正则矩阵 / JS 实跑一次过）
 - [ ] provider 的 mrs 地址能取到：`curl -sI <url>` 应为 200
 - [ ] 用真实订阅结构跑一遍 `main(config)`，确认旧版遗留的 `DOMAIN-SUFFIX,...,🌐 MEGA` 已被清掉
 
@@ -392,16 +414,16 @@ JS 里同一个正则要出现两次：清单存**不带** `(?i)` 的裸正则�
 改完一律跑脚本，不要手搓命令：
 
 ```bash
-python3 scripts/check_overrides.py          # 全量（三个应用）
-python3 scripts/check_overrides.py mega     # 只查一个应用
-python3 scripts/check_overrides.py -q       # 只打印失败项
+python3 Scripts/check_overrides.py          # 全量（三个应用）
+python3 Scripts/check_overrides.py mega     # 只查一个应用
+python3 Scripts/check_overrides.py -q       # 只打印失败项
 ```
 
 脚本查这些，任何一项不过就是退出码 1：
 
 | 检查 | 具体 |
 |---|---|
-| 目录结构 | `overrides/<app>/<app>.{yaml,js}` 成对存在，目录名与文件名一致 |
+| 目录结构 | `Overrides/<app>/<app>.{yaml,js}` 成对存在，目录名与文件名一致 |
 | 版本头 | 格式 `Version X.Y.Z · YYYY-MM-DD HH:MM ── 摘要`，两版版本号一致 |
 | YAML | 可解析、`+proxy-groups` 存在 |
 | 主组结构 | `select`、`include-all`、icon 是无参数 GitHub raw、proxies 前 3 项是 `♻️自动选择 / 🚀节点选择 / DIRECT`、24 个地区组都列在首选项之后 |
@@ -409,5 +431,6 @@ python3 scripts/check_overrides.py -q       # 只打印失败项
 | 正则质量 | 两字母代码必须有 `\b`（按 `\|` 拆段判定）、印度必须带 `(?!尼西亚)`、filter 里不能有退格符 |
 | 正则矩阵 | 29 条节点名 → 期望地区断言（含 `Russia-01` 不进美国、`Sweden-01` 不进德国、`印尼` 不进印度） |
 | JS | `node --check` + 假订阅实跑：首选项顺序、24 个地区组、伪节点剔除、JS 与 YAML 的 filter 逐字一致 |
+| 合集 | 组名唯一、三个主组顺序、icon 指向 `Icons/png`、地区组共用 24 个、filter 与 `mega.yaml` 一致、连套两次幂等 |
 
 需要 `node` 才跑 JS 部分，没有 node 会自动 skip。改脚本本身按知识库脚本规则升 `SCRIPT_VERSION`（版本历史写提交信息，不写进脚本）。

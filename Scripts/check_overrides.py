@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-# SCRIPT_VERSION=0.0.2    # 脚本版本(无模板上游, 独立维护; 内容变更 +1)
+# SCRIPT_VERSION=0.1.0    # 脚本版本(无模板上游, 独立维护; 内容变更 +1)
 """校验 mihomo-overrides 的覆写文件：结构 / 版本头 / 地区正则 / JS 实跑。
 
 用法:
-  python3 scripts/check_overrides.py            # 全部应用
-  python3 scripts/check_overrides.py mega       # 只查指定应用
-  python3 scripts/check_overrides.py -q         # 只打印失败项
+  python3 Scripts/check_overrides.py            # 全部应用
+  python3 Scripts/check_overrides.py mega       # 只查指定应用
+  python3 Scripts/check_overrides.py -q         # 只打印失败项
 
 退出码: 0 全部通过 / 1 有失败
 """
@@ -30,6 +30,9 @@ REGION_NAMES = [
 ]
 
 HEAD_ORDER = ['♻️自动选择', '🚀节点选择', 'DIRECT']
+
+# 合集覆写里的三个主组，顺序即插入顺序
+BUNDLE_GROUPS = ['🌐 MEGA', '💰 Boosty', '🐙 GitHub']
 
 FLAGS = {
     '香港': '🇭🇰', '台湾': '🇹🇼', '日本': '🇯🇵', '韩国': '🇰🇷', '新加坡': '🇸🇬', '美国': '🇺🇸',
@@ -155,8 +158,8 @@ def check_structure(groups: list[dict], rep: Report) -> list[str]:
         rep.fail(f'{name}: 主组缺 include-all（平铺节点进不来）')
 
     icon = str(main_group.get('icon', ''))
-    if not icon.startswith('https://raw.githubusercontent.com/') or '?' in icon:
-        rep.fail(f'{name}: icon 不是无参数的 GitHub raw 地址: {icon}')
+    if not icon.startswith('https://raw.githubusercontent.com/') or '/Icons/png/' not in icon or '?' in icon:
+        rep.fail(f'{name}: icon 应是无参数的 Icons/png 下 GitHub raw 地址: {icon}')
 
     proxies = main_group.get('proxies') or []
     head = proxies[:3]
@@ -233,7 +236,7 @@ def check_matrix(defined: dict[str, dict], rep: Report) -> None:
 
 
 def app_file(app: str, ext: str) -> Path:
-    return ROOT / 'overrides' / app / f'{app}.{ext}'
+    return ROOT / 'Overrides' / app / f'{app}.{ext}'
 
 
 def check_versions(app: str, rep: Report) -> None:
@@ -264,11 +267,9 @@ def check_js_syntax(app: str, rep: Report) -> bool:
     return True
 
 
-def check_js_run(app: str, groups: list[dict], defined: dict[str, dict], rep: Report) -> None:
-    node = shutil.which('node')
-    prefix = groups[0].get('name', '?').split(' ')[0]
+def fake_config() -> dict:
     nodes = SAMPLE_NODES + FAKE_NODES
-    cfg = {
+    return {
         'proxies': [
             {'name': n, 'type': 'ss', 'server': '1.1.1.1', 'port': 1,
              'cipher': 'aes-128-gcm', 'password': 'x'}
@@ -279,20 +280,32 @@ def check_js_run(app: str, groups: list[dict], defined: dict[str, dict], rep: Re
             {'name': '🚀节点选择', 'type': 'select', 'proxies': [SAMPLE_NODES[0]]},
         ],
     }
+
+
+def run_js(path: Path, cfg: dict) -> dict:
+    node = shutil.which('node')
     with tempfile.TemporaryDirectory() as td:
         wrapper = Path(td) / 'w.js'
         wrapper.write_text(JS_WRAPPER, encoding='utf-8')
         cfg_file = Path(td) / 'c.json'
         cfg_file.write_text(json.dumps(cfg, ensure_ascii=False), encoding='utf-8')
         r = subprocess.run(
-            [node, str(wrapper), str(app_file(app, 'js')), str(cfg_file)],
+            [node, str(wrapper), str(path), str(cfg_file)],
             capture_output=True, text=True, timeout=60,
         )
     if r.returncode != 0:
-        rep.fail(f'{app}.js 执行失败: {r.stderr.strip().splitlines()[:1]}')
+        raise RuntimeError((r.stderr.strip().splitlines() or ['?'])[0])
+    return json.loads(r.stdout)
+
+
+def check_js_run(app: str, groups: list[dict], defined: dict[str, dict], rep: Report) -> None:
+    prefix = groups[0].get('name', '?').split(' ')[0]
+    try:
+        out = run_js(app_file(app, 'js'), fake_config())
+    except RuntimeError as exc:
+        rep.fail(f'{app}.js 执行失败: {exc}')
         return
 
-    out = json.loads(r.stdout)
     result_groups = out.get('proxy-groups') or []
     main_group = next((g for g in result_groups if g.get('name') == groups[0]['name']), None)
     if not main_group:
@@ -333,7 +346,7 @@ def check_app(app: str, rep: Report) -> None:
     yaml_path = app_file(app, 'yaml')
     js_path = app_file(app, 'js')
     if not yaml_path.exists() or not js_path.exists():
-        rep.fail(f'{app}: overrides/{app}/ 下 yaml 与 js 必须成对存在')
+        rep.fail(f'{app}: Overrides/{app}/ 下 yaml 与 js 必须成对存在')
         return
 
     check_versions(app, rep)
@@ -355,19 +368,99 @@ def check_app(app: str, rep: Report) -> None:
         check_js_run(app, groups, defined, rep)
 
 
+def check_bundle(rep: Report) -> None:
+    print('== all')
+    path = ROOT / 'Overrides' / 'all.js'
+    if not path.exists():
+        rep.fail('Overrides/all.js 缺失')
+        return
+    node = shutil.which('node')
+    if not node:
+        rep.skip('node 不在 PATH，跳过合集脚本校验')
+        return
+    r = subprocess.run([node, '--check', str(path)], capture_output=True, text=True)
+    if r.returncode != 0:
+        rep.fail(f'all.js 语法错误: {r.stderr.strip().splitlines()[:1]}')
+        return
+
+    try:
+        first = run_js(path, fake_config())
+        again = run_js(path, first)
+    except RuntimeError as exc:
+        rep.fail(f'all.js 执行失败: {exc}')
+        return
+
+    groups = first.get('proxy-groups') or []
+    names = [g.get('name') for g in groups if g.get('name')]
+    dup = sorted({n for n in names if names.count(n) > 1})
+    if dup:
+        rep.fail(f'all.js 组名重复（内核会报 duplicate name）: {dup[:4]}')
+    else:
+        rep.ok(f'组名唯一（{len(names)} 组）')
+
+    order = [n for n in names if n in BUNDLE_GROUPS]
+    if order != BUNDLE_GROUPS:
+        rep.fail(f'all.js 主组顺序应为 {BUNDLE_GROUPS}，实为 {order}')
+
+    for name in BUNDLE_GROUPS:
+        g = next((x for x in groups if x.get('name') == name), None)
+        if not g:
+            rep.fail(f'all.js 缺主组 {name}')
+            continue
+        proxies = g.get('proxies') or []
+        if proxies[:3] != HEAD_ORDER:
+            rep.fail(f'{name}: 组首顺序应为 {HEAD_ORDER}，实为 {proxies[:3]}')
+        icon = str(g.get('icon', ''))
+        if '/Icons/png/' not in icon or '?' in icon:
+            rep.fail(f'{name}: icon 应指向 Icons/png 且无参数，实为 {icon}')
+        leaked = [n for n in FAKE_NODES if n in proxies]
+        if leaked:
+            rep.fail(f'{name}: 伪节点混进主组 {leaked}')
+
+    region_names = [f'{FLAGS[r]} {r}' for r in REGION_NAMES]
+    if len([n for n in names if n in region_names]) != len(REGION_NAMES):
+        rep.fail(f'all.js 国旗地区组应有 {len(REGION_NAMES)} 个，实为 {len([n for n in names if n in region_names])}')
+    else:
+        rep.ok(f'三个主组共用 {len(region_names)} 个国旗地区组')
+
+    # 地区组清单在三处存在（yaml / 单应用 js / 合集），filter 必须逐字同源
+    defined = {g['name']: g for g in load_yaml_groups(app_file('mega', 'yaml'))[1:] if g.get('name')}
+    diff = []
+    for region, flag in FLAGS.items():
+        want = defined.get(f'🌐 {region}', {}).get('filter')
+        got = next((g.get('filter') for g in groups if g.get('name') == f'{flag} {region}'), None)
+        if want and got != want:
+            diff.append(region)
+    if diff:
+        rep.fail(f'all.js 地区组 filter 与 mega.yaml 不一致: {diff[:4]}')
+    else:
+        rep.ok('地区组 filter 与 mega.yaml 逐条一致')
+
+    rules = [str(x) for x in (first.get('rules') or [])]
+    for name in BUNDLE_GROUPS:
+        if not any(f',{name}' in x for x in rules):
+            rep.fail(f'all.js 没有任何规则指向 {name}')
+
+    if len(again.get('proxy-groups') or []) != len(groups) or len(again.get('rules') or []) != len(rules):
+        rep.fail('all.js 重复套用不幂等（组数或规则数变了）')
+    else:
+        rep.ok(f'幂等：连套两次仍是 {len(groups)} 组 / {len(rules)} 条规则')
+
+
 def main(argv: list[str]) -> int:
     args = [a for a in argv[1:] if not a.startswith('-')]
     quiet = '-q' in argv or '--quiet' in argv
     rep = Report(quiet=quiet)
 
-    found = sorted(ROOT.glob('overrides/*/*.yaml'))
+    found = sorted(ROOT.glob('Overrides/*/*.yaml'))
     for p in found:
         if p.stem != p.parent.name:
-            rep.fail(f'{p.relative_to(ROOT)}: 目录名与文件名必须一致（overrides/<app>/<app>.yaml）')
+            rep.fail(f'{p.relative_to(ROOT)}: 目录名与文件名必须一致（Overrides/<app>/<app>.yaml）')
 
     apps = args or [p.parent.name for p in found]
     for app in apps:
         check_app(app, rep)
+    check_bundle(rep)
 
     print()
     if rep.fails:

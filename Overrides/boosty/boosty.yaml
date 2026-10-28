@@ -1,62 +1,58 @@
-# Version 0.1.3 · 2026-10-25 10:12 ── show per-country groups below subscription groups instead of hiding them
-# GitHub 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
+# Version 0.1.4 · 2026-10-29 00:18 ── point group icons at Icons/png
+# Boosty 覆写（YAML）。用法：Mishka → 配置 → 覆写 → 新增 → 远程下载 → 填本文件 raw 地址。
 #   键位语法按 PC 版：+key 数组前插、key+ 追加、key! 强制替换、其余深度合并。
 #   组位置：键位只有前插（+proxy-groups）与追加（proxy-groups+），落不到指定位置。本文件用前插，
-#   GitHub 会出现在列表最顶端；要排在「节点选择」「自动选择」之后请改用 github.js。
+#   Boosty 会出现在列表最顶端；要排在「节点选择」「自动选择」之后请改用 boosty.js。
 #   rules 是顺序匹配：必须前插，追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）。
 #
-#   范围取舍（有意排除的项）：
-#     - github.io：全世界用户的 Pages 站点，访问任何人的博客都会命中，收进来等于把整个互联网往组里塞。
-#     - ghcr.io / npmjs：镜像与包下载，大流量且多数场景应直连或走别的组。
-#     - githubstatus / cafe / collector 等遥测域名：不影响功能，收进来只是徒增规则。
+#   只有域名规则，没有 IP 规则，原因：
+#     - geosite 没有 boosty 分类（v2fly 的 data/boosty 是 404），boosty.to 只挂在
+#       MAILRU-GROUP / CATEGORY-RU / GEOLOCATION-!CN 下，用哪个都会顺带拖进一整片无关域名，
+#       所以域名手写。
+#     - boosty.to 解析到 95.181.179.179（AS42632 MnogoByte），是俄罗斯托管商的共享段，
+#       同段还跑着别的客户站点，按 IP 收必误伤，因此不写 IP-CIDR / IP-ASN。
 #
-#   没有 IP 规则，原因：
-#     - GitHub 的 Release 与资源下载走 Amazon S3（github-production-*.s3.amazonaws.com）和
-#       Azure Blob（productionresultssa*），这些不在 GitHub 自己的 AS36459 里，IP-ASN 兜不住。
-#     - api.github.com/meta 公布的段是 web/API 出口，与下载链不同源，按 IP 收会挂一半漏一半。
-#       凑不出「域名 + 网段 + ASN」三层，就不要硬凑（同 boosty 的处理）。
-#
-#   include-all 让组自动并入订阅里的全部节点，换订阅、加节点都不用改本文件。代价：机场塞的伪节点
-#   （"剩余流量：948 GB"这类）也会进组，且 exclude-filter 管不到 include-all 的项 —— 要剔掉伪节点
-#   请改用 github.js。
+#   include-all 让组自动并入订阅里的全部节点，换订阅、加节点都不用改本文件。代价：机场塞的
+#   伪节点（"剩余流量：948 GB"这类）也会进组，且 exclude-filter 管不到 include-all 的项
+#   —— 要剔掉伪节点请改用 boosty.js。
 
   # 主组用 select：只有 select 的成员能放 proxy-group，「自动选择」「节点选择」和下面的
   #   国家/地区组才进得来。proxies 顺序 = 自动选择 → 节点选择 → DIRECT → 国家/地区，
   #   平铺节点由 include-all 追加在最后（内核行为，写不到前面）。
-  # 组名硬写在这里：订阅里没有该组的话内核会整份配置校验失败，github.js 会先检测再引用。
+  # 组名硬写在这里：订阅里没有该组的话内核会整份配置校验失败，boosty.js 会先检测再引用。
 +proxy-groups:
-  - name: 🐙 GitHub
+  - name: 💰 Boosty
     type: select
-    icon: https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/github.png
+    icon: https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Icons/png/boosty.png
     include-all: true
     proxies:
       - ♻️自动选择
       - 🚀节点选择
       - DIRECT
-      - 🐙 香港
-      - 🐙 台湾
-      - 🐙 日本
-      - 🐙 韩国
-      - 🐙 新加坡
-      - 🐙 美国
-      - 🐙 英国
-      - 🐙 德国
-      - 🐙 荷兰
-      - 🐙 俄罗斯
-      - 🐙 加拿大
-      - 🐙 澳大利亚
-      - 🐙 法国
-      - 🐙 马来西亚
-      - 🐙 泰国
-      - 🐙 越南
-      - 🐙 印度
-      - 🐙 印度尼西亚
-      - 🐙 菲律宾
-      - 🐙 土耳其
-      - 🐙 巴西
-      - 🐙 阿联酋
-      - 🐙 意大利
-      - 🐙 西班牙
+      - 💰 香港
+      - 💰 台湾
+      - 💰 日本
+      - 💰 韩国
+      - 💰 新加坡
+      - 💰 美国
+      - 💰 英国
+      - 💰 德国
+      - 💰 荷兰
+      - 💰 俄罗斯
+      - 💰 加拿大
+      - 💰 澳大利亚
+      - 💰 法国
+      - 💰 马来西亚
+      - 💰 泰国
+      - 💰 越南
+      - 💰 印度
+      - 💰 印度尼西亚
+      - 💰 菲律宾
+      - 💰 土耳其
+      - 💰 巴西
+      - 💰 阿联酋
+      - 💰 意大利
+      - 💰 西班牙
 
   # 国家/地区组：固定 24 个清单，filter 在运行时匹配节点名（provider 里的节点也能筛）。
   #   · (?i) 必须带：内核 filter 走 regexp2，默认区分大小写
@@ -64,7 +60,7 @@
   #   · empty-fallback 必须显式写 DIRECT：内核默认回退 COMPATIBLE，订阅没这个组会校验失败
   #   · lazy 只在使用时测速省电；tolerance 防抖（延迟差 50ms 内不换节点）
 proxy-groups+:
-  - name: 🐙 香港
+  - name: 💰 香港
     type: url-test
     include-all: true
     filter: '(?i)香港|🇭🇰|\bhk\b|hong ?kong|港'
@@ -73,7 +69,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 台湾
+  - name: 💰 台湾
     type: url-test
     include-all: true
     filter: '(?i)台湾|台灣|🇹🇼|\btw\b|taiwan|台'
@@ -82,7 +78,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 日本
+  - name: 💰 日本
     type: url-test
     include-all: true
     filter: '(?i)日本|🇯🇵|\bjp\b|japan|日'
@@ -91,7 +87,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 韩国
+  - name: 💰 韩国
     type: url-test
     include-all: true
     filter: '(?i)韩国|韓國|🇰🇷|\bkr\b|korea|韩|韓'
@@ -100,7 +96,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 新加坡
+  - name: 💰 新加坡
     type: url-test
     include-all: true
     filter: '(?i)新加坡|狮城|獅城|🇸🇬|\bsg\b|singapore'
@@ -109,7 +105,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 美国
+  - name: 💰 美国
     type: url-test
     include-all: true
     filter: '(?i)美国|美國|🇺🇸|\bus\b|\busa\b|united ?states|美'
@@ -118,7 +114,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 英国
+  - name: 💰 英国
     type: url-test
     include-all: true
     filter: '(?i)英国|英國|🇬🇧|\buk\b|\bgb\b|united ?kingdom|英'
@@ -127,7 +123,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 德国
+  - name: 💰 德国
     type: url-test
     include-all: true
     filter: '(?i)德国|德國|🇩🇪|\bde\b|germany|德'
@@ -136,7 +132,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 荷兰
+  - name: 💰 荷兰
     type: url-test
     include-all: true
     filter: '(?i)荷兰|荷蘭|🇳🇱|\bnl\b|netherlands|荷'
@@ -145,7 +141,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 俄罗斯
+  - name: 💰 俄罗斯
     type: url-test
     include-all: true
     filter: '(?i)俄罗斯|俄羅斯|🇷🇺|\bru\b|russia|俄'
@@ -154,7 +150,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 加拿大
+  - name: 💰 加拿大
     type: url-test
     include-all: true
     filter: '(?i)加拿大|🇨🇦|\bca\b|canada'
@@ -163,7 +159,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 澳大利亚
+  - name: 💰 澳大利亚
     type: url-test
     include-all: true
     filter: '(?i)澳大利亚|澳洲|🇦🇺|\bau\b|australia|澳'
@@ -172,7 +168,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 法国
+  - name: 💰 法国
     type: url-test
     include-all: true
     filter: '(?i)法国|法國|🇫🇷|\bfr\b|france|法'
@@ -181,7 +177,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 马来西亚
+  - name: 💰 马来西亚
     type: url-test
     include-all: true
     filter: '(?i)马来西亚|馬來西亞|🇲🇾|\bmy\b|malaysia'
@@ -190,7 +186,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 泰国
+  - name: 💰 泰国
     type: url-test
     include-all: true
     filter: '(?i)泰国|泰國|🇹🇭|\bth\b|thailand|泰'
@@ -199,7 +195,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 越南
+  - name: 💰 越南
     type: url-test
     include-all: true
     filter: '(?i)越南|🇻🇳|\bvn\b|vietnam|越'
@@ -208,7 +204,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 印度
+  - name: 💰 印度
     type: url-test
     include-all: true
     filter: '(?i)印度(?!尼西亚)|🇮🇳|\bin\b|india'
@@ -217,7 +213,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 印度尼西亚
+  - name: 💰 印度尼西亚
     type: url-test
     include-all: true
     filter: '(?i)印度尼西亚|印尼|🇮🇩|\bid\b|indonesia'
@@ -226,7 +222,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 菲律宾
+  - name: 💰 菲律宾
     type: url-test
     include-all: true
     filter: '(?i)菲律宾|菲律賓|🇵🇭|\bph\b|philippines'
@@ -235,7 +231,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 土耳其
+  - name: 💰 土耳其
     type: url-test
     include-all: true
     filter: '(?i)土耳其|🇹🇷|\btr\b|turkey|türkiye|土'
@@ -244,7 +240,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 巴西
+  - name: 💰 巴西
     type: url-test
     include-all: true
     filter: '(?i)巴西|🇧🇷|\bbr\b|brazil'
@@ -253,7 +249,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 阿联酋
+  - name: 💰 阿联酋
     type: url-test
     include-all: true
     filter: '(?i)阿联酋|🇦🇪|\bae\b|emirates|dubai'
@@ -262,7 +258,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 意大利
+  - name: 💰 意大利
     type: url-test
     include-all: true
     filter: '(?i)意大利|義大利|🇮🇹|\bit\b|italy'
@@ -271,7 +267,7 @@ proxy-groups+:
     tolerance: 50
     lazy: true
     empty-fallback: DIRECT
-  - name: 🐙 西班牙
+  - name: 💰 西班牙
     type: url-test
     include-all: true
     filter: '(?i)西班牙|🇪🇸|\bes\b|spain'
@@ -282,17 +278,5 @@ proxy-groups+:
     empty-fallback: DIRECT
 +rules:
   # rules 顺序匹配，必须前插：追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）
-  # DOMAIN-SUFFIX 自带子域（api./raw./camo./avatars. 这些），不用逐条写
-  - DOMAIN-SUFFIX,github.com,🐙 GitHub
-  - DOMAIN-SUFFIX,githubusercontent.com,🐙 GitHub
-  - DOMAIN-SUFFIX,githubassets.com,🐙 GitHub
-  - DOMAIN-SUFFIX,github.dev,🐙 GitHub
-  - DOMAIN-SUFFIX,github.blog,🐙 GitHub
-  - DOMAIN-SUFFIX,github.community,🐙 GitHub
-  - DOMAIN-SUFFIX,githubapp.com,🐙 GitHub
-  - DOMAIN-SUFFIX,githubpreview.dev,🐙 GitHub
-  - DOMAIN-SUFFIX,ghe.com,🐙 GitHub
-  - DOMAIN-SUFFIX,gh.io,🐙 GitHub
-  - DOMAIN-SUFFIX,git.io,🐙 GitHub
-  - DOMAIN-SUFFIX,dependabot.com,🐙 GitHub
-  - DOMAIN-SUFFIX,repo.new,🐙 GitHub
+  # DOMAIN-SUFFIX 自带子域（media./api./static. 这些），不用逐条写
+  - DOMAIN-SUFFIX,boosty.to,💰 Boosty

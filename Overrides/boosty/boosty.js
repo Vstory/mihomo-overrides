@@ -1,20 +1,15 @@
-// Version 0.1.3 · 2026-10-25 10:12 ── show per-country groups below subscription groups instead of hiding them
-// GitHub 覆写（JavaScript）。与 github.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
-//   GitHub 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
+// Version 0.1.4 · 2026-10-29 00:18 ── point group icons at Icons/png
+// Boosty 覆写（JavaScript）。与 boosty.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
+//   Boosty 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
 //   内核约定：main(config) 的入参出参都是整份配置对象（goja 执行、2 秒超时、输出上限 1 MB）。
 //
-//   只有域名规则，没有 IP 规则：GitHub 的 Release 与资源下载走 Amazon S3 与 Azure Blob，
-//   都不在 GitHub 自己的 AS36459 里，IP-ASN 兜不住，按 IP 收还会误伤同段其它租户。
-// Version 2.9.0 · 2026-10-24 ── add per-country url-test groups (auto-pick the fastest node per country)
-// MEGA 覆写（JavaScript）。与 mega.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
-//   MEGA 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
-//   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
-//   内核约定：main(config) 的入参出参都是整份配置对象（goja 执行、2 秒超时、输出上限 1 MB）。
+//   只有域名规则，没有 IP 规则：boosty.to 解析到 AS42632 MnogoByte 的共享段，按 IP 收会误伤
+//   同段其它客户站点；geosite 也没有 boosty 分类（只挂在 MAILRU-GROUP / CATEGORY-RU 下）。
 function main(config) {
-  var GROUP = '🐙 GitHub';
+  var GROUP = '💰 Boosty';
   // 组图标走 Mishka 的 IconLoader：网络图片 + 磁盘缓存，PNG 最好（BitmapFactory 不解码 .ico）
-  var ICON = 'https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/icons/github.png';
+  var ICON = 'https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Icons/png/boosty.png';
   // 机场惯用伪节点名，命中就不进组（想连这些信息节点也能选的话，删掉这一行）
   var FAKE = /剩余流量|剩余|距离下次|套餐到期|过期|到期时间|官网|重置|流量重置/;
 
@@ -162,21 +157,7 @@ function main(config) {
   }
   config['proxy-groups'] = rest;
 
-  var rules = [
-    'DOMAIN-SUFFIX,github.com,' + GROUP,
-    'DOMAIN-SUFFIX,githubusercontent.com,' + GROUP,
-    'DOMAIN-SUFFIX,githubassets.com,' + GROUP,
-    'DOMAIN-SUFFIX,github.dev,' + GROUP,
-    'DOMAIN-SUFFIX,github.blog,' + GROUP,
-    'DOMAIN-SUFFIX,github.community,' + GROUP,
-    'DOMAIN-SUFFIX,githubapp.com,' + GROUP,
-    'DOMAIN-SUFFIX,githubpreview.dev,' + GROUP,
-    'DOMAIN-SUFFIX,ghe.com,' + GROUP,
-    'DOMAIN-SUFFIX,gh.io,' + GROUP,
-    'DOMAIN-SUFFIX,git.io,' + GROUP,
-    'DOMAIN-SUFFIX,dependabot.com,' + GROUP,
-    'DOMAIN-SUFFIX,repo.new,' + GROUP
-  ];
+  var rules = ['DOMAIN-SUFFIX,boosty.to,' + GROUP];
 
   // 剔掉目标组是本组的旧规则：旧版写过别的域名时，只比对全等会留下残骸
   var oldRules = config.rules || [];
