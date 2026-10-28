@@ -12,7 +12,7 @@
 
   ```
   # Title: MEGA 覆写（YAML）
-  # Description: 订阅全部节点经 include-all 并入 🌐 MEGA 组（伪节点会一起进来），规则条目同 mega.js
+  # Description: 订阅全部节点经 include-all 并入 🌐 MEGA 组（伪节点会一起进来），规则条目同 Mega.js
   # Version: 0.1.6
   # Last modified: 2026-10-29 00:37
   # Changelog: split header into one field per line
@@ -79,7 +79,7 @@ JS 形态约定：定义 `main(config)`，入参出参都是整份配置对象�
 
 ## 每个应用一套文件
 
-`Overrides/mega/{mega.yaml,mega.js}`、`Overrides/boosty/{boosty.yaml,boosty.js}`，每个应用一个目录、一组文件，互不引用。新加应用照抄结构：`<app>.yaml` 给不写脚本的人，`<app>.js` 多一层伪节点过滤和动态组引用，两版规则内容必须等价。
+`Overrides/mega/{Mega.yaml,Mega.js}`、`Overrides/boosty/{Boosty.yaml,Boosty.js}`，每个应用一个目录、一组文件，互不引用。新加应用照抄结构：`<app>.yaml` 给不写脚本的人，`<app>.js` 多一层伪节点过滤和动态组引用，两版规则内容必须等价。
 
 `boosty` 是个反例值得记住：它的 IP 在托管商共享段（AS42632 MnogoByte），按 IP 收必误伤；geosite 也没有独立分类。所以只有一条 `DOMAIN-SUFFIX`。**不是每个应用都能凑出「域名 + ASN + 网段」三层，凑不出就别硬凑。**
 
@@ -93,7 +93,7 @@ JS 形态约定：定义 `main(config)`，入参出参都是整份配置对象�
   复用命中会让它们既不重建又被删掉——连套两次，第三份配置就少了 24 组。单应用脚本里 drop 的
   是 YAML 版前缀名（`🌐 香港`），与自建的国旗名不同，所以那边没这个坑。
 - **清单三处同源**：合集的 `REGIONS` 必须与 `Overrides/<app>/<app>.js` 逐字相同，改一处就得同步；
-  `Scripts/check_overrides.py` 会把合集的 filter 与 `mega.yaml` 逐条比对。
+  `Scripts/check_overrides.py` 会把合集的 filter 与 `Mega.yaml` 逐条比对。
 - **改完跑** `python3 Scripts/check_overrides.py`，合集那段以 `== all` 开头。
 
 ## 图标设计
@@ -293,8 +293,8 @@ rule-providers:
 - [ ] 域名在前、IP 在后，IP 规则都带 `no-resolve`
 - [ ] 组名 `🌐 MEGA` 逐字一致，emoji 后有一个空格
 - [ ] 首选项里的聚合组（自动选择 / 节点选择 / 各运营商推荐节点）都真的在订阅里
-- [ ] `Overrides/mega/mega.yaml` 与 `mega.js` 的规则条目、provider 配置一致
-- [ ] 本地能加载：`python3 -c "import yaml;yaml.safe_load(open('Overrides/mega/mega.yaml'))"`、`node --check Overrides/mega/mega.js`
+- [ ] `Overrides/Mega/Mega.yaml` 与 `Mega.js` 的规则条目、provider 配置一致
+- [ ] 本地能加载：`python3 -c "import yaml;yaml.safe_load(open('Overrides/Mega/Mega.yaml'))"`、`node --check Overrides/Mega/Mega.js`
 - [ ] 跑一遍 `python3 Scripts/check_overrides.py mega`（头部 / 结构 / 正则矩阵 / JS 实跑一次过）
 - [ ] provider 的 mrs 地址能取到：`curl -sI <url>` 应为 200
 - [ ] 用真实订阅结构跑一遍 `main(config)`，确认旧版遗留的 `DOMAIN-SUFFIX,...,🌐 MEGA` 已被清掉
@@ -439,6 +439,6 @@ python3 Scripts/check_overrides.py -q       # 只打印失败项
 | 正则质量 | 两字母代码必须有 `\b`（按 `\|` 拆段判定）、印度必须带 `(?!尼西亚)`、filter 里不能有退格符 |
 | 正则矩阵 | 29 条节点名 → 期望地区断言（含 `Russia-01` 不进美国、`Sweden-01` 不进德国、`印尼` 不进印度） |
 | JS | `node --check` + 假订阅实跑：首选项顺序、24 个地区组、伪节点剔除、JS 与 YAML 的 filter 逐字一致 |
-| 合集 | 组名唯一、主组顺序、icon 指向 `Icons/png`、地区组共用 24 个、filter 与 `mega.yaml` 一致、连套两次幂等 |
+| 合集 | 组名唯一、主组顺序、icon 指向 `Icons/png`、地区组共用 24 个、filter 与 `Mega.yaml` 一致、连套两次幂等 |
 
 需要 `node` 才跑 JS 部分，没有 node 会自动 skip。改脚本本身按知识库脚本规则升 `SCRIPT_VERSION`（版本历史写提交信息，不写进脚本）。

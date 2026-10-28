@@ -8,12 +8,12 @@ Mishka → 配置 → 覆写 → 新增 → 远程下载，填地址，格式选
 
 ```text
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/all.js
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/mega/mega.js
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/mega/mega.yaml
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/boosty/boosty.js
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/boosty/boosty.yaml
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/github/github.js
-https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/github/github.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Mega/Mega.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Mega/Mega.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Boosty/Boosty.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Boosty/Boosty.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/GitHub/GitHub.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/GitHub/GitHub.yaml
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Pornhub/Pornhub.js
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Pornhub/Pornhub.yaml
 ```

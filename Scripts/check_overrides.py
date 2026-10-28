@@ -4,7 +4,7 @@
 
 用法:
   python3 Scripts/check_overrides.py            # 全部应用
-  python3 Scripts/check_overrides.py mega       # 只查指定应用
+  python3 Scripts/check_overrides.py Mega       # 只查指定应用
   python3 Scripts/check_overrides.py -q         # 只打印失败项
 
 退出码: 0 全部通过 / 1 有失败
@@ -452,7 +452,7 @@ def check_bundle(rep: Report) -> None:
         rep.ok(f'各主组共用 {len(region_names)} 个国旗地区组')
 
     # 地区组清单在三处存在（yaml / 单应用 js / 合集），filter 必须逐字同源
-    defined = {g['name']: g for g in load_yaml_groups(app_file('mega', 'yaml'))[1:] if g.get('name')}
+    defined = {g['name']: g for g in load_yaml_groups(app_file('Mega', 'yaml'))[1:] if g.get('name')}
     diff = []
     for region, flag in FLAGS.items():
         want = defined.get(f'🌐 {region}', {}).get('filter')
@@ -460,9 +460,9 @@ def check_bundle(rep: Report) -> None:
         if want and got != want:
             diff.append(region)
     if diff:
-        rep.fail(f'all.js 地区组 filter 与 mega.yaml 不一致: {diff[:4]}')
+        rep.fail(f'all.js 地区组 filter 与 Mega.yaml 不一致: {diff[:4]}')
     else:
-        rep.ok('地区组 filter 与 mega.yaml 逐条一致')
+        rep.ok('地区组 filter 与 Mega.yaml 逐条一致')
 
     rules = [str(x) for x in (first.get('rules') or [])]
     for name in BUNDLE_GROUPS:
