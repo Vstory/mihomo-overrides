@@ -83,6 +83,8 @@ JS 形态约定：定义 `main(config)`，入参出参都是整份配置对象�
 
 `boosty` 是个反例值得记住：它的 IP 在托管商共享段（AS42632 MnogoByte），按 IP 收必误伤；geosite 也没有独立分类。所以只有一条 `DOMAIN-SUFFIX`。**不是每个应用都能凑出「域名 + ASN + 网段」三层，凑不出就别硬凑。**
 
+域名清单优先取 `v2fly/domain-list-community` 的分类文件（`data/<分类>`，与 geosite 同源、纯文本可逐条核对），转换规则：普通项 → `DOMAIN-SUFFIX`；`full:` 前缀 → `DOMAIN` 精确匹配；带 `@ads` / `@telemetry` 标记的项与 `regexp:` 条目不收（遥测不影响功能，正则条目随部署变化、写死必失效）；别人也在用的共享平台端点（如 `turn.livekit.cloud`）同样不收。`OpenAI` / `Claude` / `Grok` 三个 AI 覆写就是这样从 `openai` / `anthropic` / `xai` 分类转出来的。
+
 ## 合集覆写 `Overrides/all.js`
 
 四个应用的规则合到一份，只提供 JS 形态：

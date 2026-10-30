@@ -16,9 +16,15 @@ https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/GitHub/
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/GitHub/GitHub.yaml
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Pornhub/Pornhub.js
 https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Pornhub/Pornhub.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/OpenAI/OpenAI.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/OpenAI/OpenAI.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Claude/Claude.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Claude/Claude.yaml
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Grok/Grok.js
+https://raw.githubusercontent.com/Vstory/mihomo-overrides/main/Overrides/Grok/Grok.yaml
 ```
 
-- `all.js` 是 MEGA + Boosty + GitHub + Pornhub 的合集，勾一个就全生效；其余八个按应用单独用
+- `all.js` 是 MEGA + Boosty + GitHub + Pornhub 的合集，勾一个就全生效；其余十一个按应用单独用
 - 合集与单应用**二选一**，同时勾选会互相删组
 - 保存后在「订阅」页勾选给目标订阅
 
