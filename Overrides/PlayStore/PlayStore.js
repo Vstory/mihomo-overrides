@@ -1,8 +1,8 @@
 // Title: PlayStore 覆写（JavaScript）
 // Description: 订阅里的全部节点自动并入 🛍️ Google Play 组并剔除伪节点；8 条域名规则前插
-// Version: 0.0.1
-// Last modified: 2026-11-04 23:26
-// Changelog: initial override for Google Play
+// Version: 0.0.2
+// Last modified: 2026-11-04 23:54
+// Changelog: route the Play download domain direct, keep store and API proxied
 //
 // 与 PlayStore.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
 //   🛍️ Google Play 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
@@ -17,12 +17,14 @@
 //   分类里带 @cn 的两条正则（^r+[0-9]+(---|\.)sn-(2x3|ni5|j5o)\w{5}\.xn--ngstr-lra8j\.com$ 与
 //   同形的 googlevideo.com 版）不收：前者已被 DOMAIN-SUFFIX,xn--ngstr-lra8j.com 完全覆盖。
 //
-// xn--ngstr-lra8j.com 是 Play 的 APK/OBB 下载域，这里整体走代理、不写 DIRECT 例外。代价要知道：
-//   该域下的主机名（rr*---sn-j5o*/ni5*/2x3*）绑死在国内 GGC 节点上 —— j5o=广州、ni5=上海、
-//   2x3=北京，实测本机 DNS、Google DoH、Cloudflare DoH 三方解析同一个主机名都返回国内 IP
-//   （如 58.63.233.67，广州电信 AS4134），换 DNS 也拿不到境外地址。因此走境外节点时，
-//   这些下载连接可能 dial tcp <国内 IP>:443 i/o timeout（连的是中国电信的地址，出口却在海外）。
-//   本组首选项里备了 DIRECT：真遇上超时，在 App 里把 🛍️ Google Play 切到 DIRECT 即走国内节点下载。
+// xn--ngstr-lra8j.com 是 Play 的 APK/OBB 下载域，走 DIRECT；其余 Play 域名走本组。
+//   原因：该域下的主机名（rr*---sn-j5o*/ni5*/2x3*）绑死在国内 GGC 节点上 —— j5o=广州、
+//   ni5=上海、2x3=北京，实测本机 DNS、Google DoH、Cloudflare DoH 三方解析同一个主机名都返回
+//   国内 IP（如 58.63.233.67、113.108.239.x，广州电信 AS4134），换 DNS 也拿不到境外地址。
+//   这类 IP 从境外节点拨号必然 i/o timeout：实测验走代理时下载卡在 95%~98%、日志全是
+//   dial tcp 113.108.239.x:443 超时；改回直连后同一批 APK 立刻下完，且不吃节点流量。
+//   代价：换到本地直连不可达的网络（异地 SIM、公司网）下载会卡，那时把这行改成
+//   ,🛍️ Google Play 走代理即可。
 //
 // 不收 gvt1.com / gvt2.com：那是 Chrome 与 Google 组件更新域，收进来会连带把系统更新流量也代理掉，
 // 超出 Play 商店的范围。
@@ -206,13 +208,14 @@ function main(config) {
   config['proxy-groups'] = rest;
 
   var rules = [
+    // 下载域直连：解析出来是国内 GGC，从境外节点连必然超时（见文件头说明）
+    'DOMAIN-SUFFIX,xn--ngstr-lra8j.com,DIRECT',
     'DOMAIN-SUFFIX,play.google.com,' + GROUP,
     'DOMAIN-SUFFIX,googleplay.com,' + GROUP,
     'DOMAIN-SUFFIX,play.googleapis.com,' + GROUP,
     'DOMAIN-SUFFIX,play-fe.googleapis.com,' + GROUP,
     'DOMAIN-SUFFIX,play-lh.googleusercontent.com,' + GROUP,
     'DOMAIN-SUFFIX,play-games.googleusercontent.com,' + GROUP,
-    'DOMAIN-SUFFIX,xn--ngstr-lra8j.com,' + GROUP,
     'DOMAIN,redirector.c.play.google.com,' + GROUP
   ];
 

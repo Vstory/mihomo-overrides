@@ -404,8 +404,8 @@ def check_store_takeover(app: str, rep: Report) -> None:
     kept = [r for r in out.get('rules') or [] if isinstance(r, str)]
     if 'DOMAIN-SUFFIX,apple.com,🚀节点选择' not in kept:
         errs.append('无关规则被误删')
-    if not any(r.startswith('DOMAIN-SUFFIX,xn--ngstr-lra8j.com,') and not r.endswith(STORE_GROUP) for r in kept):
-        errs.append('下载域没有归到本组')
+    if 'DOMAIN-SUFFIX,xn--ngstr-lra8j.com,DIRECT' not in kept:
+        errs.append('下载域应走 DIRECT（解析出来是国内 GGC）')
 
     if errs:
         rep.fail('顶替订阅商店组：' + '；'.join(errs[:4]))
