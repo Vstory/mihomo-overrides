@@ -104,6 +104,11 @@ SAMPLE_NODES = [
 ]
 FAKE_NODES = ['剩余流量：948 GB', '套餐到期：2026-12-01']
 
+# 订阅自带的 Play 商店组：PlayStore.js 会把它整个顶掉（组、规则、别组对它的引用）
+STORE_GROUP = '📱谷歌商店'
+# 需要顶掉商店组的应用；其它应用的 JS 没有这段逻辑，fixture 里塞了会误判
+STORE_TAKEOVER_APPS = {'PlayStore'}
+
 JS_WRAPPER = '''const fs = require("fs");
 const main = new Function(fs.readFileSync(process.argv[2], "utf8") + "\\nreturn main;")();
 const cfg = JSON.parse(fs.readFileSync(process.argv[3], "utf8"));
@@ -286,9 +291,9 @@ def check_js_syntax(app: str, rep: Report) -> bool:
     return True
 
 
-def fake_config() -> dict:
+def fake_config(with_store: bool = False) -> dict:
     nodes = SAMPLE_NODES + FAKE_NODES
-    return {
+    cfg = {
         'proxies': [
             {'name': n, 'type': 'ss', 'server': '1.1.1.1', 'port': 1,
              'cipher': 'aes-128-gcm', 'password': 'x'}
@@ -299,6 +304,17 @@ def fake_config() -> dict:
             {'name': '🚀节点选择', 'type': 'select', 'proxies': [SAMPLE_NODES[0]]},
         ],
     }
+    if with_store:
+        # 仿订阅的样子：商店组自己有一份节点，别的组引用它，规则也指向它
+        cfg['proxy-groups'][0]['proxies'].append(STORE_GROUP)
+        cfg['proxy-groups'].append({'name': STORE_GROUP, 'type': 'select', 'proxies': [SAMPLE_NODES[2]]})
+        cfg['proxy-groups'].append({'name': '🐟漏网之鱼', 'type': 'select', 'proxies': [STORE_GROUP]})
+        cfg['rules'] = [
+            f'DOMAIN-SUFFIX,xn--ngstr-lra8j.com,{STORE_GROUP}',
+            'DOMAIN-SUFFIX,apple.com,🚀节点选择',
+            f'MATCH,{STORE_GROUP}',
+        ]
+    return cfg
 
 
 def run_js(path: Path, cfg: dict) -> dict:
@@ -358,6 +374,43 @@ def check_js_run(app: str, groups: list[dict], defined: dict[str, dict], rep: Re
         rep.fail(f'{app}.js 伪节点混进主组: {leaked}')
     else:
         rep.ok(f'JS 实跑：顺序 {proxies[:3]} → 地区组 {len(got_regions)} 个 → 平铺 {len(proxies) - 3 - len(got_regions)} 节点，伪节点已剔除')
+
+    if app in STORE_TAKEOVER_APPS:
+        check_store_takeover(app, rep)
+
+
+def check_store_takeover(app: str, rep: Report) -> None:
+    """订阅自带的商店组必须被整个顶掉：组本身、指向它的规则、其它组对它的引用。
+
+    只删组不清引用，内核会报 proxy group not found；只删规则不删组，界面上那个组还占着一行，
+    分流失效但看起来「有配」——两种残骸都要在脚本里挡住。
+    """
+    try:
+        out = run_js(app_file(app, 'js'), fake_config(with_store=True))
+    except RuntimeError as exc:
+        rep.fail(f'{app}.js 顶替商店组时执行失败: {exc}')
+        return
+
+    errs = []
+    out_groups = out.get('proxy-groups') or []
+    if STORE_GROUP in [g.get('name') for g in out_groups]:
+        errs.append('商店组没删掉')
+    for g in out_groups:
+        if STORE_GROUP in (g.get('proxies') or []):
+            errs.append(f'{g.get("name")} 仍引用商店组')
+    for rule in out.get('rules') or []:
+        if isinstance(rule, str) and rule.rsplit(',', 1)[-1].strip() == STORE_GROUP:
+            errs.append(f'规则残留：{rule}')
+    kept = [r for r in out.get('rules') or [] if isinstance(r, str)]
+    if 'DOMAIN-SUFFIX,apple.com,🚀节点选择' not in kept:
+        errs.append('无关规则被误删')
+    if not any(r.startswith('DOMAIN-SUFFIX,xn--ngstr-lra8j.com,') and not r.endswith(STORE_GROUP) for r in kept):
+        errs.append('下载域没有归到本组')
+
+    if errs:
+        rep.fail('顶替订阅商店组：' + '；'.join(errs[:4]))
+    else:
+        rep.ok('顶替订阅商店组：组已删除、引用清空、旧规则不残留、无关规则保留')
 
 
 def check_app(app: str, rep: Report) -> None:

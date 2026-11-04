@@ -7,6 +7,9 @@
 // 与 PlayStore.yaml 的区别：这个版本会把订阅里的**全部节点**自动塞进
 //   🛍️ Google Play 组（不用手写节点名，换订阅、加节点都不用改），并剔掉机场塞的伪节点
 //   （"剩余流量：948 GB""套餐到期"这类不是真节点的信息项）。
+//   还会把订阅自带的那行「📱谷歌商店」组整个顶掉：组本身、指向它的规则、别的组对它的引用
+//   一起清掉（引用清空后补 DIRECT，否则内核报 proxy group not found）。YAML 的键位只有
+//   前插/追加/替换/合并、没有删除语义，做不到删组，只能留着那个组占位。
 //   内核约定：main(config) 的入参出参都是整份配置对象（goja 执行、2 秒超时、输出上限 1 MB）。
 //
 // 域名清单取自 v2fly/domain-list-community 的 google-play 分类（与 geosite 同源），逐条转写：
@@ -14,7 +17,7 @@
 //   分类里带 @cn 的两条正则（^r+[0-9]+(---|\.)sn-(2x3|ni5|j5o)\w{5}\.xn--ngstr-lra8j\.com$ 与
 //   同形的 googlevideo.com 版）不收：前者已被 DOMAIN-SUFFIX,xn--ngstr-lra8j.com 完全覆盖。
 //
-// xn--ngstr-lra8j.com 是 Play 的 APK/OBB 下载域，这里按你的要求整体走代理。代价要知道：
+// xn--ngstr-lra8j.com 是 Play 的 APK/OBB 下载域，这里整体走代理、不写 DIRECT 例外。代价要知道：
 //   该域下的主机名（rr*---sn-j5o*/ni5*/2x3*）绑死在国内 GGC 节点上 —— j5o=广州、ni5=上海、
 //   2x3=北京，实测本机 DNS、Google DoH、Cloudflare DoH 三方解析同一个主机名都返回国内 IP
 //   （如 58.63.233.67，广州电信 AS4134），换 DNS 也拿不到境外地址。因此走境外节点时，
@@ -67,6 +70,18 @@ function main(config) {
   var i;
   for (i = 0; i < groups.length; i++) {
     if (groups[i] && groups[i].name) groupNames[groups[i].name] = true;
+  }
+
+  // ---- 顶掉订阅自带的 Play 商店组 ----
+  // 订阅把 Play 单独分进一个「📱谷歌商店」组，固定指向日本等境外节点；而 Play 的下载域
+  // xn--ngstr-lra8j.com 解析出来是国内 GGC 地址，出境连它必然 i/o timeout。这个组留着只会
+  // 抢走流量，所以连组、指向它的规则、别的组对它的引用一起清掉，Play 统一归本组。
+  // 组名靠关键词认（各家 emoji 与空格写法不同），先排除自己的组名，否则会把自己删掉。
+  var STORE_RE = /谷歌商店|谷歌应用商店|google ?play|play ?商店|play商店/i;
+  var dropped = {};
+  for (i = 0; i < groups.length; i++) {
+    var gName = groups[i] && groups[i].name;
+    if (gName && gName !== GROUP && STORE_RE.test(gName)) dropped[gName] = true;
   }
 
   // 组首选项：只引用订阅里真实存在的分组名 —— 硬写不存在的组会让内核整个配置校验失败。
@@ -160,7 +175,9 @@ function main(config) {
   for (r = 0; r < REGIONS.length; r++) drop[prefix + ' ' + REGIONS[r][0]] = true;
   var rest = [];
   for (i = 0; i < groups.length; i++) {
-    if (!groups[i] || !drop[groups[i].name]) rest.push(groups[i]);
+    if (!groups[i]) continue;
+    if (drop[groups[i].name] || dropped[groups[i].name]) continue;
+    rest.push(groups[i]);
   }
   // 组位置：插到「节点选择」「自动选择」之后。YAML 覆写只有前插/追加两种键位，
   // 落不到指定位置，所以这个版位只能在 JS 里算；两个锚点都不存在时退回最前
@@ -172,6 +189,19 @@ function main(config) {
   rest.splice(insertAt, 0, group);
   if (regionGroups.length > 0) {
     rest.push.apply(rest, regionGroups);
+  }
+  // 别的组可能把它列进了 proxies（🐟漏网之鱼 之类）：组已删，引用留着内核会报
+  // "proxy group not found"；清空后补 DIRECT，避免留下空 proxies 的组
+  for (i = 0; i < rest.length; i++) {
+    var g = rest[i];
+    if (!g || !g.proxies || !g.proxies.length) continue;
+    var keptProxies = [];
+    for (var j = 0; j < g.proxies.length; j++) {
+      if (!dropped[g.proxies[j]]) keptProxies.push(g.proxies[j]);
+    }
+    if (keptProxies.length !== g.proxies.length) {
+      g.proxies = keptProxies.length ? keptProxies : ['DIRECT'];
+    }
   }
   config['proxy-groups'] = rest;
 
@@ -186,12 +216,19 @@ function main(config) {
     'DOMAIN,redirector.c.play.google.com,' + GROUP
   ];
 
-  // 剔掉目标组是本组的旧规则：旧版写过别的域名时，只比对全等会留下残骸
+  // 剔掉目标组是本组、或已被删掉的商店组的旧规则：旧版写过别的域名时，只比对全等会留下残骸
   var oldRules = config.rules || [];
   var kept = [];
   for (i = 0; i < oldRules.length; i++) {
     var ruleLine = oldRules[i];
-    if (typeof ruleLine !== 'string' || ruleLine.indexOf(',' + GROUP) < 0) kept.push(ruleLine);
+    if (typeof ruleLine !== 'string') {
+      kept.push(ruleLine);
+      continue;
+    }
+    if (ruleLine.indexOf(',' + GROUP) >= 0) continue;
+    var cut = ruleLine.lastIndexOf(',');
+    if (cut >= 0 && dropped[ruleLine.slice(cut + 1).trim()]) continue;
+    kept.push(ruleLine);
   }
   config.rules = rules.concat(kept);
 

@@ -10,13 +10,16 @@
 #   🛍️ Google Play 会出现在列表最顶端；要排在「节点选择」「自动选择」之后请改用 PlayStore.js。
 #   rules 是顺序匹配：必须前插，追加到末尾等于永不命中（订阅的兜底规则先吃掉流量）。
 #   前插的 Play 规则会盖掉订阅自带的「谷歌商店」分流，Play 流量统一归本组。
+#   注意：YAML 键位只有前插/追加/替换/合并，没有删除语义，订阅自带的「📱谷歌商店」组仍会留在
+#   列表里（只是不再有流量指向它）。要把它从列表里彻底去掉，请改用 PlayStore.js —— 它会连组、
+#   指向它的规则、其它组对它的引用一起清掉。
 #
 # 域名清单取自 v2fly/domain-list-community 的 google-play 分类（与 geosite 同源），逐条转写：
 #   普通项 → DOMAIN-SUFFIX；full:redirector.c.play.google.com → DOMAIN 精确匹配。
 #   分类里带 @cn 的两条正则（^r+[0-9]+(---|\.)sn-(2x3|ni5|j5o)\w{5}\.xn--ngstr-lra8j\.com$ 与
 #   同形的 googlevideo.com 版）不收：前者已被 DOMAIN-SUFFIX,xn--ngstr-lra8j.com 完全覆盖。
 #
-# xn--ngstr-lra8j.com 是 Play 的 APK/OBB 下载域，这里按你的要求整体走代理。代价要知道：
+# xn--ngstr-lra8j.com 是 Play 的 APK/OBB 下载域，这里整体走代理、不写 DIRECT 例外。代价要知道：
 #   该域下的主机名（rr*---sn-j5o*/ni5*/2x3*）绑死在国内 GGC 节点上 —— j5o=广州、ni5=上海、
 #   2x3=北京，实测本机 DNS、Google DoH、Cloudflare DoH 三方解析同一个主机名都返回国内 IP
 #   （如 58.63.233.67，广州电信 AS4134），换 DNS 也拿不到境外地址。因此走境外节点时，
